@@ -1,0 +1,2720 @@
+package MegaPck;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.math3.distribution.HypergeometricDistribution;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public class Sorteados {
+
+	/*
+	 * Histórico de versões Versão 01 de 13/08/2018 Levantamento de estatisticas
+	 * Par/Impar Colunals, Linhas e quadrantes Versão 02 de 13/08/2018 Fazendo a
+	 * leitura direto do HTML Versão 03 de 14/08/2018 fazendo a leitura do zip file
+	 * Versão 04 de 14/08/2018 fazendo o download do zip file versão 05 de
+	 * 14/08/2018 estatistica de qtd de sorteior que o numero nao e sorteado versão
+	 * 06 de 15/08/2018 incluido Rank na versão 05 versão 07 de 15/08/2018 correção
+	 * na abertura do HTML do Zip e não do disco + Media Intervalo na versão 05
+	 * versão 08 de 16/08/2018 acrescentei analise das quadras e trincas com sorteio
+	 * em ordem crescente versão 09 de 17/08/2018 foi incluida a analise de ciclos
+	 * versão 10 de 18/08/2018 reformulei a lista dos maiores versão 11 de
+	 * 18/08/2018 reformulei a estrutura de Rank versão 12 de 18/08/2018 reformulei
+	 * a lista dos menores versão 13 de 19/08/2018 analise das dezenas no ultimo
+	 * ciclo versão 14 de 19/08/2018 Alterado a formula do indice incluindo media
+	 * ponderada (inicialmente indices =1) versão 15 de 19/08/2018 Incluido % em
+	 * relativo na coluna "sorteios p/N acertos e quebra por exemplo " versão 16 de
+	 * 19/08/2018 Incluido pontuação na estatistica das colunas versão 17 de
+	 * 26/08/2018 Montando matriz de combinacoes de 60 dezenas combinadas 3 a 3.
+	 * Fazendo pesquisa cruzada. versão 18 de 29/08/2018 Eliminando duplicidades.
+	 * versão 19 de 05/09/2018 Com 1706 grupos fechados, vou paralelamente gravar a
+	 * matriz. versão 20 de 13/09/2018 Com leitura da Matriz_v475.txt. Procedimento
+	 * temporario enquanto fecho a Matriz. versão 21 de 13/09/2018 Analise dos
+	 * grupos / sorteios e definicao da melhor distribuicao. versão 22 de 15/09/2018
+	 * Separação de sorteios para apuração dos indice e para testes com os indices
+	 * determinados versão 23 de 24/09/2018 Calibragem dos fatores peso dos indices
+	 * para a amostra determinada. versão 24 de 24/09/2018 Apuracao dos palpites
+	 * para jogos com base nos fatores calibrados. versão 25 de 25/09/2018 Revisão
+	 * geral dos cálculos. versão 26 de 26/09/2018 Nova tecnica de calculo
+	 * classificando com os indices de determinação e desempatando com os indices de
+	 * alocação. versão 27 de 28/09/2018 Incluida nova rotina geradora de 1900
+	 * combinaçoes com as 20 series. versão 28 de 30/09/2018 Incluida função para
+	 * pegar a versao do programa. versão 29-0 de 30/09/2018 Incluida função extarna
+	 * bat para registrar versão base para alteraçao. Para testar como posição antes
+	 * da modificação. versão 30-0 de 30/09/2018 Alteracão no relatório
+	 * "Lista dos ate" versão 30-1 de 30/09/2018 Alteracão no relatório
+	 * "Lista dos ate" incluida informacao de qtd de itens na media versão 30-2 de
+	 * 30/09/2018 Alteracão no relatório "Lista dos ate" incluida media direto na
+	 * classe Calibragem versão 31-0 de 30/09/2018 Captura de informaçoes do ultimo
+	 * sorteio. versão 32-0 de 01/10/2018 Criacao dos indices com a classificacao de
+	 * topo, centro e base versão 32-1 de 01/10/2018 Criacao do indice maiores
+	 * versão 32-2 de 01/10/2018 Eliminacao estrutura maiores antiga versao 32-3 de
+	 * 03/10/2018 Criacao da estrutura de sub indices, reformulacao do relatório
+	 * "Analise tempo sem sorteio  no formato (Numero - Qtd de sorteios)" e aviso
+	 * que nao pode baizar ZIP versao 33-0 de 03/10/2018 Criado o sub indice 1 do
+	 * indice para alimentar o indice ptMseq e opcao de executar o programa com zip
+	 * antigo. versao 34-0 de 05/10/2018 Criar base de teste para eliminacao de
+	 * estrutura antiga. versao 34-0 de 05/10/2018 Criar base de teste para
+	 * eliminacao de estrutura antiga. versao 35-0 de 05/10/2018 Criar base de teste
+	 * para geral dos indices. versao 36-0 de 05/10/2018 Criar base de teste para
+	 * geral dos indices. versao 37-0 de 07/10/2018 Alteração das classes BaseIndice
+	 * IndiceAbstract de modo a operarem somente com a base dos indices . versao
+	 * 38-0 de 07/10/2018 Calibragem com parametros ate o ultimo sorteio . versao
+	 * 39-0 de 07/10/2018 Paralelizacao. versao 40-0 de 07/10/2018 Renovacao da
+	 * rotina de escolha da serie de sucesso. (interrompido por problema
+	 * processamento paralelo) versao 41-0 de 07/10/2018 Ajustes no processamento.
+	 * Neste ponto processsamento paralelo dentro do sorteio ok. versao 42-0 de
+	 * 07/10/2018 Inclusao do Indice de darhal na Coleção. versao 43-0 de 21/10/2018
+	 * Revisao geral do codigo. Alterar o indice para inibir indice com fator 0
+	 * versao 52-0 de 31/10/2018 Corrrecao do indice UltimoCiclo .... versao 53-0 de
+	 * 02/11/2018 Totalização do Rank intermediaraia para evitar falta de memoria.
+	 * versao 54-0 de 02/11/2018 Criar classe com fatores. versao 55-0 de 03/11/2018
+	 * Criar opçaõ para gerar arquivo no formato : java Sorteados >
+	 * ..\workplace\Lixo_v_%DisplayVersion%-%numero%_%date:~0,2%%date:~3,2%%date:~6,
+	 * 4%%hour%%min%%secs%.txt versao 56-0 de 04/11/2018 Resolvendo problemas com
+	 * versão zip de cache do servidor da caixa. versao 57-0 de 04/11/2018 Gravacao
+	 * do Rank intermediario. versao 58-0 de 04/11/2018 Leitura do flag
+	 * saidaForcada.flg no diretorio corrente forçando a parada do processamento c/
+	 * a gravacao dos resultados atuais versao 59-0 de 09/11/2018 Ajuste na
+	 * expressao da formula, gravacao de seguranca para nivel >3 acerto no loop dos
+	 * tipos versao 60-0 de 09/11/2018 Com totalização por parametros testados para
+	 * melhor performance versão 61-0 de 20/11/2018 em caso de parametro invalido
+	 * sai help. versão 62-0 de 21/11/2018 Criação de opção para aproveitar
+	 * profundidade anterior versão 63-0 de 28/11/2018 Relatorio com as dezenas
+	 * formatadas. versão 64-0 de 11/12/2018 Mudança para fazer calculo com e sem
+	 * Drahal na mesma rodada. versão 65-0 de 18/12/2018 Criação do indice de Monte
+	 * Carlo. versão 66-0 de 14/02/2019 Criação do relatorio ultimos sorteados.
+	 * versão 66-1 de 25/03/2019 Aceita nome do html no zip em minuscula. Aceita -d
+	 * para verificar data do ultimo sorteio no arquivo da caixa. versão 66-2 de
+	 * 28/03/2019 Apresenta data do arquivo HTM baixado da caixa na console quando
+	 * executado com -d. versão 68-0 de 08/04/2019 Classe Darhal com ajuste na
+	 * precisão + PDM review versão 69-0 de 08/04/2019 Quebra do paralelismo para
+	 * não clonar Colecao e poupar memoria +m uso do SSD versão 70-0 de 08/04/2019
+	 * Processamento com rankCalibragem Final direto. versão 71-0 de 08/04/2019
+	 * Processamento com teste de formula. versão 72-0 de 08/04/2019 Processamento
+	 * com formulas ajustadas. versão 73-0 de 08/04/2019 Novo hash, Static no
+	 * soprocessa e novo busca Acerto versão 74-0 de 08/04/2019 Retorno ao hash
+	 * antigo versão 75-0 de 08/04/2019 Criação do indice Drop, reativação do indice
+	 * UltPQtdSB1 e ajuste na busca do IndiceAbstrato versão 76-0 de 08/04/2019 Novo
+	 * processamento com uma previa analise dos indices versão 77-0 de 15/09/2019
+	 * Ajuste na classificação do Rank versão 77-1 de 20/04/2020 Incuida opção para
+	 * aguardar divulgacao oficial do sorteio. versão 77-2 de 02/05/2020 Acelerar
+	 * processamento calculo das apostas classificadas por quantidade de
+	 * fórmulas/acertos computados. versão 77-3 de 09/11/2022 Proteção de erro ao
+	 * ler TXT com tab ou espaco. versão 77-4 de 30/01/2025 Obtenção dos resultados
+	 * via API. versão 78-0 de 11/05/2025 Novo Rank com registro de acertos
+	 * individuais e nova formula de pesquisa.
+	 *
+	 */
+	// ******************************************************
+	/*******************************************************
+	 *
+	 * Area de ajustes de processamento
+	 *
+	 */ // ***********************************************
+
+	static double precoAposta = 5;
+	static byte numeroDeIteracoes = 2; // variando de 1 a 3.
+	static byte profundidade = 2; // =2 são 65.536 procs/sorteio =3 são 6.588.344 porcs/sorteio =4 são 120.000.000
+	// =5 são 1.003.976.272 procs / sorteio
+	static String ver = "78-" + profundidade + "-" + numeroDeIteracoes;
+	static boolean estamosEmTeste = false;
+	// static String ver = "99-" + profundidade;
+	// static boolean estamosEmTeste = true;
+	// static String nomeZipDados="File_Zip_Mega_Base_"+ver+"-1.zip";
+	static String nomeZipDados = "";
+	static String nomeRankCalibragem = "";
+	static String nomeRankCalibragemCarga = "";
+	static String nomeTxtFile = "";
+	// static List<byte[]> listaApostas = new ArrayList<>();
+	static List<byte[]> listaJogos = new ArrayList<>();
+	static Set<Long> indiceApostas = new HashSet<>();
+	// static long[] baseHash = new long[61];
+	public static final long[] baseHash;
+	static {
+		baseHash = new long[61];
+		for (int contador = 1; contador < 61; contador++) {
+			baseHash[contador] = (1L << (contador - 1));
+		}
+	}
+	static int[] resultados = new int[3];
+	static final byte NUMMAXDEZENAS = 10;
+	static List<byte[]> listaOrdemSorteio;
+	static Colecao colecao;
+	static List<Calibragem> rCF = new ArrayList<>();
+	static List<Calibragem> rankCalibragemFinal = Collections.synchronizedList(rCF);
+	static Calibragem item;
+	// static NumberFormat defaultFormat;
+	static short numSorteio;
+	static int qtdGandoresSena;
+	static int sorteioParaAguardar = 0;
+	static String dataSorteio;
+	static String dataProximoSorteio;
+	static double rateioSena;
+	static double rateioQuina;
+	static double rateioQuadra;
+	static String acumulada;
+	static double valorAcumulado;
+	static double estimativaPremio;
+	static boolean saidaSolicitada;
+	static boolean continuidade;
+	static long numeroDeProcessamentos = 0;
+	static long tempoTotalDeProcessamento = 0;
+	final static int qtdItens = (numFormulas(2, 4, 8) * (numFormulas(1, 4, 2) + 1) + numFormulas(1, 4, 2)) * 2;
+	public static final int SEGUNDOS_POR_MINUTO = 60;
+	public static final int MINUTOS_POR_HORA = 60;
+	public static final int HORAS = 6;
+	public static final int MINISEGUNDOS_POR_SEGUNDO = 1000;
+	public static final double TEMPO_MEDIO_PROCESSO_EM_MINUTOS = 7.5;
+	public static final int LIMITE_NUMERO_PARA_GRAVACAO_DE_SEGURANCA = 25;
+	public static final long LIMITE_TEMPO_PARA_GRAVACAO_DE_SEGURANCA = TimeUnit.MINUTES
+			.toMillis((long) (LIMITE_NUMERO_PARA_GRAVACAO_DE_SEGURANCA * TEMPO_MEDIO_PROCESSO_EM_MINUTOS));
+
+	private static void adicionaJogo(final byte dez01, final byte dez02, final byte dez03, final byte dez04,
+			final byte dez05, final byte dez06, final byte numJogo) {
+		final long hash = baseHash[dez01] | baseHash[dez02] | baseHash[dez03] | baseHash[dez04] | baseHash[dez05]
+				| baseHash[dez06];
+		if (!indiceApostas.contains(hash)) {
+			listaJogos.add(new byte[] { numJogo, dez01, dez02, dez03, dez04, dez05, dez06, 1 });
+			indiceApostas.add(hash);
+		} else {
+			// System.out.println("duplicidade no jogo "+Arrays.toString(new byte[]
+			// {numJogo,b,c,d,e,f,g}));
+			// }
+			/// adiciono contator de repetição
+			byte[] jogo = new byte[7];
+			long hashBuscador;
+			for (int conta = 0; conta < listaJogos.size(); conta++) {
+				jogo = listaJogos.get(conta);
+				hashBuscador = baseHash[jogo[1]] | baseHash[jogo[2]] | baseHash[jogo[3]] | baseHash[jogo[4]]
+						| baseHash[jogo[5]] | baseHash[jogo[6]];
+				// dezenas = new byte[] { jogo[1], jogo[2], jogo[3], jogo[4], jogo[5], jogo[6]
+				// };
+				/// jogo[1] == dez01 & jogo[2] == dez02 & jogo[3] == dez03 & jogo[4] == dez04 &
+				// jogo[5] == dez05
+				/// & jogo[6] == dez06)
+				if (hash == hashBuscador) {
+					listaJogos.get(conta)[7]++;
+					break;
+				}
+			}
+		}
+	}
+
+	/////////////////////////////////////////////////////////////////
+
+	private static void apuraResultado() {
+		// processar todas as formulas
+		// final byte[][] indice = { { 0, 0, 1 }, { 0, 1, 0 }, { 0, 1, 1 }, { 1, 0, 0 },
+		// { 1, 0, 1 }, { 1, 1, 0 },
+		// { 0, 0, 2 }, { 0, 2, 0 }, { 0, 2, 2 }, { 2, 0, 0 }, { 2, 0, 2 }, { 2, 2, 0 }
+		// };
+		final SimpleDateFormat format = new SimpleDateFormat();
+		format.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+		final int nReg = rankCalibragemFinal.size();
+		byte[][] aposta;
+		Formula formulaLocal;
+		// final long hash;
+		// final apostaAcerto itemApostaAcerto = new apostaAcerto();
+		// final int itemEncontrado;
+		// final int incremento = (estamosEmTeste ? 1 : 2);
+		int percente = 0;
+		final int fracao = (nReg - 10) / 10;
+		/// System.setOut(console);
+		System.out.println("\nInicio da apuração do ultimo sorteio nas formulas.( "
+				+ format.format(GregorianCalendar.getInstance().getTime()) + " ).");
+		final long t1 = System.currentTimeMillis();
+		final byte[] sorteioAtual = listaOrdemSorteio.get(0);
+		// final byte[] sorteioAtual = { 47, 27, 54, 23, 30, 51 };
+		// baseHash = new long[61];
+		final long hashSorteio = baseHash[sorteioAtual[0]] + baseHash[sorteioAtual[1]] + baseHash[sorteioAtual[2]]
+				+ baseHash[sorteioAtual[3]] + baseHash[sorteioAtual[4]] + baseHash[sorteioAtual[5]];
+		long tempHash;
+		/// if (semNovoCalculo == false) {
+		int senas = 0, quinas = 0, quadras = 0, ternos = 0, duplas = 0, solos = 0;
+		for (int n = 0; n < nReg; n += 2) {
+			if (n % fracao == 0 & n > 0) {
+				percente += 10;
+				System.out.println(
+						"Processadas até o momento ( " + format.format(GregorianCalendar.getInstance().getTime())
+								+ " ) aproximadamente " + percente + "% das fórmulas.");
+				// System.out.println("\nForam computadas até o momento: " + String.format("%,d
+				// senas, ", senas)
+				// + String.format("%,d quinas e ", quinas) + String.format("%,d quadras.",
+				// quadras));
+			}
+			item = rankCalibragemFinal.get(n);
+			// if (item.numSorteiosComAcerto == 66) {
+			// System.out.println("Ponto de analise");
+			// }
+			formulaLocal = new Formula(item.baseFormula);
+			// aposta = SoProcessa.defineDezenas(formulaLocal, colecao, (byte) 10, indice);
+			aposta = SoProcessa.defineDezenasUltra(formulaLocal, colecao);// , indice);
+			for (byte comOuSemDarhak = 0; comOuSemDarhak < 2; comOuSemDarhak++) {
+				// tempHash = geraHash(aposta[comOuSemDarhak]);
+				/*
+				 * ver 78 tempHash = baseHash[aposta[comOuSemDarhak][0]] +
+				 * baseHash[aposta[comOuSemDarhak][1]] + baseHash[aposta[comOuSemDarhak][2]] +
+				 * baseHash[aposta[comOuSemDarhak][3]];
+				 */
+				// + baseHash[aposta[comOuSemDarhak][4]] + baseHash[aposta[comOuSemDarhak][5]];
+				// ver 78
+				tempHash = geraHash(aposta[comOuSemDarhak]);
+				long intersecao = hashSorteio & tempHash;
+				if (intersecao == 0) {
+					continue;
+				}
+				final int numeroDeAcertos = Long.bitCount(intersecao);
+
+				// final int numeroDeAcertos = Long.bitCount(hashSorteio & tempHash);
+				// if (numeroDeAcertos == 0) {
+				// continue;
+				// }
+				switch (numeroDeAcertos) {
+				case 1:
+					solos++;
+					break;
+				case 2:
+					duplas++;
+					break;
+				case 3:
+					ternos++;
+					break;
+				case 4:
+					quadras++;
+					break;
+				case 5:
+					quinas++;
+					break;
+				default:
+					senas++; // 6 ou mais (se aplicável)
+				}
+
+				/*
+				 * ver 78 if ((hashSorteio & tempHash) != 0) { byte nAcertosInicial = 0; for
+				 * (byte cursorSorteio = 0; cursorSorteio < 6; cursorSorteio++) { if
+				 * (((baseHash[sorteioAtual[cursorSorteio]]) & tempHash) != 0) {
+				 * nAcertosInicial++; } } byte nAcertosPriDezena = 0; for (int j = 4; j < 9;
+				 * j++) { for (byte cursorSorteio = 0; cursorSorteio < 6; cursorSorteio++) { if
+				 * (((baseHash[sorteioAtual[cursorSorteio]]) &
+				 * baseHash[aposta[comOuSemDarhak][j]]) != 0) { nAcertosPriDezena = 1; break; }
+				 * } for (int k = j + 1; k < 10; k++) { byte nAcertosSegDezena = 0; for (byte
+				 * cursorSorteio = 0; cursorSorteio < 6; cursorSorteio++) { if
+				 * (((baseHash[sorteioAtual[cursorSorteio]]) &
+				 * baseHash[aposta[comOuSemDarhak][k]]) != 0) { nAcertosSegDezena = 1; break; }
+				 * } final byte nAcertos = (byte) (nAcertosInicial + nAcertosPriDezena +
+				 * nAcertosSegDezena); if (nAcertos > 3) { senas += (nAcertos == 6 ? 1 : 0);
+				 * quinas += (nAcertos == 5 ? 1 : 0); quadras += (nAcertos == 4 ? 1 : 0); //
+				 * //System.out.println( // " Estamos testando se a aposta " +
+				 * Arrays.toString(aposta[comOuSemDarhak]) // + " no sorteio " +
+				 * Arrays.toString(sorteioAtual)); //System.out.println("\nForam computadas : "
+				 * + String.format("%,d senas, ", senas) // + String.format("%,d quinas e ",
+				 * quinas) // + String.format("%,d quadras", quadras)); // } } } ///if
+				 * ((sufixSorteio & tempHash) != 0) {
+				 * //System.out.println(" Estamos testando se a aposta " +
+				 * Arrays.toString(aposta[comOuSemDarhak]) // + " no sorteio " +
+				 * Arrays.toString(sorteioAtual)); ///} }
+				 */
+				item = rankCalibragemFinal.get(n + 1);
+			}
+		}
+		System.out.println("Final da apuracao do ultimo sorteio nas formulas. Executado em : " + getHMS(t1));
+		resultados[0] = senas;
+		resultados[1] = quinas;
+		resultados[2] = quadras;
+		System.out.println(
+				"\nForam computadas : " + String.format("%,d senas, ", senas) + String.format("%,d quinas ", quinas)
+						+ String.format("%,d quadras ", quadras) + String.format("%,d ternos ", ternos)
+						+ String.format("%,d duplas e ", duplas) + String.format("%,d solos.", solos));
+	}
+
+	// private static void bestNumbers(final byte[][] indice, final PrintStream
+	// arquivo, final PrintStream console,
+	private static void bestNumbers(final PrintStream arquivo, final PrintStream console,
+			final boolean semNovoCalculo) {
+		// processar todas as formulas
+		final SimpleDateFormat format = new SimpleDateFormat();
+		format.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+		List<apostaAcerto> apostasList = new ArrayList<>();
+		final List<apostaAcerto> apostasListSave = new ArrayList<>();
+		final int nReg = rankCalibragemFinal.size();
+		byte[][] aposta;
+		Formula formulaLocal;
+		long hash;
+		final apostaAcerto itemApostaAcerto = new apostaAcerto();
+		int itemEncontrado;
+		// final int incremento = (estamosEmTeste ? 1 : 2);
+		int percente = 0;
+		final int fracao = (nReg - 10) / 10;
+		System.setOut(console);
+		System.out.println("\nInicio da apuração das apostas.( "
+				+ format.format(GregorianCalendar.getInstance().getTime()) + " ).");
+		long t1 = System.currentTimeMillis();
+		if (semNovoCalculo == false) {
+			for (int n = 0; n < nReg; n += 2) {
+				if (n % fracao == 0 & n > 0) {
+					percente += 10;
+					System.out.println(
+							"Processadas até o momento ( " + format.format(GregorianCalendar.getInstance().getTime())
+									+ " ) aproximadamente " + percente + "% das fórmulas.");
+				}
+				item = rankCalibragemFinal.get(n);
+				// if (item.numSorteiosComAcerto == 66) {
+				// System.out.println("Ponto de analise");
+				// }
+				formulaLocal = new Formula(item.baseFormula);
+				// aposta = SoProcessa.defineDezenas(formulaLocal, colecao, (byte) 10, indice);
+				aposta = SoProcessa.defineDezenasUltra(formulaLocal, colecao);// , indice);
+				for (byte comOuSemDarhak = 0; comOuSemDarhak < 2; comOuSemDarhak++) {
+					hash = geraHash(aposta[comOuSemDarhak]);
+					itemApostaAcerto.aposta = hash;
+					// System.out.print(
+					// "\nTrabalhando a formula numero " + (n + comOuSemDarhak) + " com codigo " +
+					// item.baseFormula
+					// + " que estava com o resultado " + Arrays.toString(aposta[comOuSemDarhak]));
+					if (apostasList.contains(itemApostaAcerto)) {
+						itemEncontrado = apostasList.indexOf(itemApostaAcerto);
+						apostasList.get(itemEncontrado).qtdAcertos += item.numSorteiosComAcerto();
+						apostasList.get(itemEncontrado).qtdFormulas++;
+						// System.out.print(" Havia registro. Atualizei registro com + " +
+						// item.numSorteiosComAcerto
+						// + " acertos.Passando o total para " +
+						// apostasList.get(itemEncontrado).qtdAcertos
+						// + " e a qtd de formulas para " +
+						// apostasList.get(itemEncontrado).qtdFormulas);
+					} else {
+						apostasList.add(new apostaAcerto(hash, item.numSorteiosComAcerto()));
+						// System.out.print(
+						// " Nao havia registro. Criei registro com " + item.numSorteiosComAcerto + "
+						// acertos.");
+					}
+					item = rankCalibragemFinal.get(n + 1);
+				}
+			}
+			apostasList.get(0).totRegSet(apostasList.size());
+		} else {
+			apostasList = carregaBestNumber();
+		}
+		System.out.println("Final da da apuração das apostas. Executado em : " + getHMS(t1));
+		System.setOut(arquivo);
+		/*
+		 * System.out.
+		 * println("\nEm um universo de 238.399 possibilidades {C(10,6)=210	210/50.063.860 = 0,00042% (1 em 238.399)}, foram geradas: "
+		 * + String.format("%,d ", apostasList.size()) + String.format("%5.2f ",
+		 * ((float) apostasList.size() / (float) 238399 * 100)) + "%\n");
+		 */
+		System.out.println("\nO Ranking esta com " + nReg + " registros");
+		System.out.println(
+				"\nEm um universo de 238.399 possibilidades {C(10,6)=210	210/50.063.860 = 0,00042% (1 em 238.399)},\n foram geradas: "
+						+ String.format("%,d ", apostasList.get(0).totRegGet()) + " combinações ==> ("
+						+ String.format("%,d ", apostasList.get(0).totRegGet()) + "* 210/50.063.860 = "
+						+ String.format("%5.2f ", ((float) apostasList.get(0).totRegGet() / (float) 238399 * 100))
+						+ "% chances de acerto de uma sena.\n");
+		for (byte tipoRelatorio = 1; tipoRelatorio < 3; tipoRelatorio++) {
+			// listaApostas.clear();
+			listaJogos.clear();
+			indiceApostas.clear();
+			System.setOut(console);
+			System.out.println("\n" + format.format(GregorianCalendar.getInstance().getTime())
+					+ " Classificando as apostas por quantidade de "
+					+ (tipoRelatorio == 1 ? "acertos." : " fórmulas computadas."));
+			t1 = System.currentTimeMillis();
+			// Calibragem.ordem = 1;
+			// Collections.sort(rankCalibragemFinal);
+			// ranquear resultados
+			itemApostaAcerto.ordemSet(tipoRelatorio);
+			Collections.sort(apostasList);
+			System.out.println("Final da Classificação das apostas por quantidade de "
+					+ (tipoRelatorio == 1 ? "acertos." : " fórmulas computadas.") + ". Executado em : " + getHMS(t1));
+			// System.setOut(arquivo);
+			// elencar melhor aposta
+			// nReg = apostasList.size();
+			// for (int n = 0; n < nReg; n++) {
+			// itemApostaAcerto = apostasList.get(n);
+			// System.out.println(String.format("%02d ", (n + 1)) + " " +
+			// openAposta(itemApostaAcerto.aposta) + " "
+			// + itemApostaAcerto.qtdAcertos);
+			// }
+			System.setOut(arquivo);
+			System.out.println("\nRelação das apostas classificadas por quantidade de "
+					+ (tipoRelatorio == 1 ? "acertos." : " fórmulas computadas.") + "\n");
+			System.out.println("======   ==================================== =============  ============");
+			System.out.println("Aposta   aposta c/maior número de ocorrencias Núm.acertos    Núm.fórmulas");
+			System.out.println("======   ==================================== =============  ============");
+			for (byte n = 0; n < (apostasList.size() > 5 ? 5 : apostasList.size()); n++) {
+				System.out.println("  " + (n + 1) + "-         " + openAposta(apostasList.get(n).aposta) + "   "
+				// + String.format("%11s", String.format("%,d", apostasList.get(n).qtdAcertos))
+				// + " "
+				// + String.format("%12s", String.format("%,d",
+				// apostasList.get(n).qtdFormulas)));
+						+ String.format("%,11d", apostasList.get(n).qtdAcertos) + "  "
+						+ String.format("%,12d", apostasList.get(n).qtdFormulas));
+				processa(openApostaNum(apostasList.get(n).aposta), (byte) (n + 1));
+				if (!apostasListSave.contains(apostasList.get(n))) {
+					apostasListSave.add(apostasList.get(n));
+				}
+			}
+			if (semNovoCalculo == false) {
+				apostasListSave.get(0).totRegSet(apostasList.size());
+				// System.out.println("Registrei o total de registros: " + apostasList.size() +
+				// " e o totReg fico em: "
+				// + apostasListSave.get(0).totRegGet());
+				salvaBestNumber(apostasListSave);
+			}
+			System.out.println("");
+			printResumo();
+		}
+	}
+
+	/////////////////////////////////////////////////////////////////
+	private static void calibragemParalelaDosFatores() throws Exception {
+		// final int qtdNoTeste = 1;
+		// colecao.darhal.recalcula = true;
+		System.out.println();
+		System.out.print("\n             *********************    calibragem dos fatores  de peso    ****************");
+		System.out.println("\nEstamos calculando sobre uma base de " + listaOrdemSorteio.size() + " sorteios.");
+		short numeroSorteioAtual;
+		final long tempoIniCalibragem = System.currentTimeMillis();
+		int nTotResult = 1;
+		final File flagSaidaForcada = new File("saidaForcada.flg");
+		final ProcSorteio processadorDeSorteio = new ProcSorteio();
+		processadorDeSorteio.profundidade = profundidade;
+		processadorDeSorteio.numMaxDezenas = NUMMAXDEZENAS;
+		processadorDeSorteio.rateioSena = rateioSena;
+		processadorDeSorteio.rateioQuina = rateioQuina;
+		processadorDeSorteio.rateioQuadra = rateioQuadra;
+		processadorDeSorteio.rankCalibragemFinal = rankCalibragemFinal;
+		long tInicial;
+		Date d;
+		final SimpleDateFormat format = new SimpleDateFormat();
+		format.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+		long tFinal;
+		long tGrupo;
+		int sorteiosParaProcessar;
+		long tPrevisto;
+		Long tSalvaDeSeguranca = System.currentTimeMillis();
+		float atual;
+
+		while (listaOrdemSorteio.size() > 0 & !saidaSolicitada) {
+			if (listaOrdemSorteio.size() == 1) {
+				apuraResultado();
+			}
+			numeroSorteioAtual = (short) (numSorteio - listaOrdemSorteio.size() + 1);
+			atual = numeroSorteioAtual;
+			// if (!estamosEmTeste) {
+			// Disparado o processo do sorteio 1597/2865 com as dezenas:[16 52 05 44 10 50]
+			// Inicio da coleta : 23/05/2025 17:06 Gravacao do Rank em : (36 procs) ou
+			// 00:07:47.775 (467775)
+			// Termino da coleta: 23/05/2025 17:15 duracao de : 00:08:37.490 (517490)
+			// ================================================>>>>>>>>>>>> Previsao de
+			// termino completo em : 31/05/2025 07:26
+			// ==========Media de (168)=== 00:07:47.775 (467775) =====>>>>> Previsao de
+			// termino completo em : 30/05/2025 14:00
+			// t1 = System.currentTimeMillis() - t1;
+			System.out.println("\nDisparado o processo do sorteio " + String.format("%1$4s", numeroSorteioAtual) + "/"
+					+ numSorteio + " (" + String.format("%6.2f", atual / numSorteio * 100) + "%) com as dezenas:"
+					+ String.format("%1$20s", sorteiotoString(listaOrdemSorteio.get(0))));
+			// }
+			processadorDeSorteio.sorteioAtual = listaOrdemSorteio.get(0);
+			processadorDeSorteio.numSorteio = numeroSorteioAtual;
+			processadorDeSorteio.colecao = colecao;
+			tInicial = System.currentTimeMillis();
+			d = GregorianCalendar.getInstance().getTime();
+			// if (!estamosEmTeste) {
+			// X System.currentTimeMillis() + (21600000 -tSalvaDeSeguranca)
+			// -(21600000-(System.currentTimeMillis() -tSalvaDeSeguranca))
+			System.out.println("Inicio  da coleta : " + format.format(d));
+
+			// }
+			processadorDeSorteio.call();
+			tFinal = System.currentTimeMillis();
+			tGrupo = (tFinal - tInicial);
+			sorteiosParaProcessar = numSorteio - numeroSorteioAtual;
+			tPrevisto = tGrupo * sorteiosParaProcessar;
+			d = GregorianCalendar.getInstance().getTime();
+			// if (!estamosEmTeste) {
+			System.out.println("Termino da coleta : " + format.format(d) + " duracao de : " + getHMS(tInicial));
+			d.setTime(d.getTime() + tPrevisto);
+			System.out.println(
+					"================================================>>>>>>>>>>>>  Previsao de termino completo em : "
+							+ format.format(d));
+			numeroDeProcessamentos++;
+			tempoTotalDeProcessamento += (tFinal - tInicial);
+			tGrupo = tempoTotalDeProcessamento / numeroDeProcessamentos;
+			tPrevisto = tGrupo * sorteiosParaProcessar;
+			d = GregorianCalendar.getInstance().getTime();
+			// System.out.println("\nTermino da coleta: "+format.format(d)+" duracao de :
+			// "+getHMS(tInicial));
+			d.setTime(d.getTime() + tPrevisto);
+			System.out.println("==========Media de (" + String.format("%3d", numeroDeProcessamentos) + ")=== "
+					+ getHMS(System.currentTimeMillis() - tGrupo) + " =====>>>>>  Previsao de termino completo em : "
+					+ format.format(d));
+			// }
+			System.out.println("Gravacao do Rank em : (" + (LIMITE_NUMERO_PARA_GRAVACAO_DE_SEGURANCA - nTotResult)
+					+ " procs) ou " + getHMSPuro(LIMITE_TEMPO_PARA_GRAVACAO_DE_SEGURANCA
+							- (System.currentTimeMillis() - tSalvaDeSeguranca)));
+			if (flagSaidaForcada.exists()) {
+				saidaSolicitada = true;
+				flagSaidaForcada.delete();
+				System.out
+						.println("Saida forçada pelo flag dentro da coleta detectada no sorteio " + numeroSorteioAtual);
+				gravaRankCalibragem(numeroSorteioAtual);
+			} else {
+				// if (!estamosEmTeste) {
+				if (profundidade > 2) {
+					if ((nTotResult == LIMITE_NUMERO_PARA_GRAVACAO_DE_SEGURANCA | ((System.currentTimeMillis()
+							- tSalvaDeSeguranca) > LIMITE_TEMPO_PARA_GRAVACAO_DE_SEGURANCA)) & !continuidade) {
+						gravaRankCalibragem(numeroSorteioAtual);
+						tSalvaDeSeguranca = System.currentTimeMillis();
+						nTotResult = 0;
+						System.out.println("Salvado registro para profundidade " + profundidade
+								+ " de segurança no sorteio " + numeroSorteioAtual);
+					}
+				}
+				// }
+			}
+			nTotResult++;
+			final Sorteio sorteio = new Sorteio();
+			sorteio.reg(listaOrdemSorteio.get(0));
+			colecao.add(sorteio);
+			listaOrdemSorteio.remove(0);
+			colecao.numeroDoUltimoSorteio = numeroSorteioAtual;
+		}
+		if (!saidaSolicitada) {
+			gravaRankCalibragem(numSorteio);
+			System.out.println("\nO tempo de iteracao da Calibragem foi de " + getHMS(tempoIniCalibragem));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static List<apostaAcerto> carregaBestNumber() {
+		List<apostaAcerto> apostasList = new ArrayList<>();
+		int total;
+		try {
+			final FileInputStream fi = new FileInputStream(new File("myObjects.txt"));
+			final ObjectInputStream oi = new ObjectInputStream(fi);
+			// Read objects
+			apostasList = (List<apostaAcerto>) oi.readObject();
+			total = (int) oi.readObject();
+			oi.close();
+			fi.close();
+			apostasList.get(0).totRegSet(total);
+		} catch (final FileNotFoundException e) {
+			System.out.println("File not found");
+		} catch (final IOException e) {
+			System.out.println("Error initializing stream");
+		} catch (final ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return apostasList;
+	}
+
+	public static void carregaRankCalibragem() {
+		carregaRankCalibragem("RankCalibragem" + ver + ".txt");
+	}
+
+	public static void carregaRankCalibragem(final String nomeRankCalibragem) {
+		final SimpleDateFormat format = new SimpleDateFormat();
+		format.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+		System.out.println("Inicio da carga do arquivo " + nomeRankCalibragem + " "
+				+ format.format(GregorianCalendar.getInstance().getTime()));
+		long qtdRegistros = 0L;
+		final long limite = (qtdItens / 10); // 13_999_999; 10% do total
+		BufferedReader br = null;
+		try {
+			br = Files.newBufferedReader(Paths.get(nomeRankCalibragem), StandardCharsets.UTF_8);
+			String line = null;
+			int ultimoSorteio = 0;
+			// int ultimoSorteio=2000;
+			int percente = 0;
+			while ((line = br.readLine()) != null) {
+				if ((++qtdRegistros % limite) == 0L) {
+					percente += 10;
+					System.out.println(
+							"Carregados até o momento ( " + format.format(GregorianCalendar.getInstance().getTime())
+									+ " ) aproximadamente " + percente + "% dos registros.");
+				}
+				if (line.substring(0, 1).equals("#")) {
+					ultimoSorteio = Integer.parseInt(line.substring(1).replaceAll(" ", ""));
+				} else {
+					line = line.trim().replaceAll("\\s{2,}", " ");
+					line = line.replaceAll(" ", ",");
+					final String[] values = line.split(",");
+					//////////////////////////////////////////
+					final Calibragem item = new Calibragem();
+					item.senas = Short.parseShort(values[0]);
+					item.quinas = Short.parseShort(values[1]);
+					item.quadras = Short.parseShort(values[2]);
+					item.ternos = Short.parseShort(values[3]);
+					item.duplas = Short.parseShort(values[4]);
+					item.solos = Short.parseShort(values[5]);
+					// item.qtdDezenas = Short.parseShort(values[6]);
+					item.ultimoSorteioComAcerto = Short.parseShort(values[6]);
+					item.baseFormula = Long.parseLong(values[7]);
+					// item.numSorteiosComAcerto = Short.parseShort(values[8]);
+					//////////////////////////////////////////
+					rankCalibragemFinal.add(item);
+				}
+			}
+			if (br != null) {
+				br.close();
+			}
+			System.out.println("Final da carga do arquivo " + nomeRankCalibragem + " "
+					+ format.format(GregorianCalendar.getInstance().getTime()));
+			if (!continuidade | nomeRankCalibragem.equals("Continuidade.txt")) {
+				if (listaOrdemSorteio.size() < ultimoSorteio) {
+					System.out.println(
+							" ******************  URGENTE   ARQUIVO de memoria do Rank mais atual que o arquivo com dados dos Sorteios **************");
+				} else {
+					System.out.println("Calculo dos fatores dos " + ultimoSorteio + " sorteios carregados." + " "
+							+ format.format(GregorianCalendar.getInstance().getTime()));
+					int contadorSorteio = 1;
+					final Sorteio sorteio = new Sorteio();
+					percente = 0;
+					final int fracao = (ultimoSorteio > 10 ? ultimoSorteio / 10 : 1);
+					while (contadorSorteio <= ultimoSorteio) {
+						if (listaOrdemSorteio.size() == 1) {
+							apuraResultado();
+						}
+						if ((contadorSorteio % fracao == 0)) {
+							percente += 10;
+							System.out.println("Calculado até o momento ( "
+									+ format.format(GregorianCalendar.getInstance().getTime()) + " ) aproximadamente "
+									+ percente + "% dos registros.");
+						}
+						sorteio.reg(listaOrdemSorteio.get(0));
+						colecao.add(sorteio);
+						listaOrdemSorteio.remove(0);
+						contadorSorteio++;
+					}
+					System.out.println("Final do calculo dos fatores dos sorteios carregados." + " "
+							+ format.format(GregorianCalendar.getInstance().getTime()));
+				}
+			}
+		} catch (final FileNotFoundException ex) {
+			ex.printStackTrace();
+		} catch (final IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	public static void carregaRankCalPrint(final String nomeRankCalPrint, List<Calibragem> rankCalibragemTemp, int qtd) {
+		final SimpleDateFormat format = new SimpleDateFormat();
+		format.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+		System.out.println("Inicio da carga do arquivo " + nomeRankCalPrint + " "
+				+ format.format(GregorianCalendar.getInstance().getTime()));
+		BufferedReader br = null;
+		try {
+			br = Files.newBufferedReader(Paths.get(nomeRankCalPrint), StandardCharsets.UTF_8);
+			String line = null;
+			int contador = 0;
+			while ((line = br.readLine()) != null & contador++<qtd) {
+					line = line.trim().replaceAll("\\s{2,}", " ");
+					line = line.replaceAll(" ", ",");
+					final String[] values = line.split(",");
+					final Calibragem item = new Calibragem();
+					item.senas = Short.parseShort(values[0]);
+					item.quinas = Short.parseShort(values[1]);
+					item.quadras = Short.parseShort(values[2]);
+					item.ternos = Short.parseShort(values[3]);
+					item.duplas = Short.parseShort(values[4]);
+					item.solos = Short.parseShort(values[5]);
+					item.ultimoSorteioComAcerto = Short.parseShort(values[6]);
+					item.baseFormula = Long.parseLong(values[7]);
+					rankCalibragemTemp.add(item);
+			}
+			if (br != null) {
+				br.close();
+			}
+			
+		} catch (final FileNotFoundException ex) {
+			ex.printStackTrace();
+		} catch (final IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	public static int comb(final int tamanho, final int serie) {
+		return (int) (fatorial(tamanho) / (fatorial(serie) * fatorial(tamanho - serie)));
+	}
+
+	public static int contarLinhas(final String nomeArquivo) {
+		try {
+			// Usa Files.lines() para criar um Stream de linhas e conta o número de linhas
+			return (int) Files.lines(Paths.get(nomeArquivo)).count();
+		} catch (final IOException e) {
+			// Se o arquivo não existir ou ocorrer um erro de leitura, retorna 0
+			return 0;
+		}
+	}
+
+	public static void copy(final InputStream input, final OutputStream output, final int bufferSize)
+			throws IOException {
+		final byte[] buf = new byte[bufferSize];
+		int n = input.read(buf);
+		while (n >= 0) {
+			output.write(buf, 0, n);
+			n = input.read(buf);
+		}
+		output.flush();
+	}
+
+	/*
+	 * private static void criaItem(final long baseFormula) { final Formula formula
+	 * = new Formula(baseFormula); formula.setFiltro(); final boolean existe =
+	 * false; // // for (byte testaExistencia = 0; testaExistencia <
+	 * rankCalibragemFinal.size(); testaExistencia += 2) { if
+	 * (rankCalibragemFinal.get(testaExistencia).baseFormula == formula.base) {
+	 * existe = true; System.out.println("A formula " + baseFormula +
+	 * " já existe na posição " + // testaExistencia + " ."); break; } } // if
+	 * (!existe) { rankCalibragemFinal.add(new Calibragem(formula.base));
+	 * formula.resetFiltro(); rankCalibragemFinal.add(new Calibragem(formula.base));
+	 * } }
+	 */
+	private static void criaItemVer74(final long baseFormula) {
+		final Formula formula = new Formula(baseFormula, true);
+		formula.setFiltro();
+		boolean existe = false;
+		for (int testaExistencia = 0; testaExistencia < rankCalibragemFinal.size(); testaExistencia += 2) {
+			if (rankCalibragemFinal.get(testaExistencia).baseFormula == formula.base) {
+				existe = true;
+				System.out.println("A formula " + baseFormula + " já existe na posição " + testaExistencia + " .");
+				break;
+			}
+		}
+		if (!existe) {
+			rankCalibragemFinal.add(new Calibragem(formula.base));
+			formula.resetFiltro();
+			rankCalibragemFinal.add(new Calibragem(formula.base));
+		}
+	}
+
+	/*
+	 * public static void downloadZIP(final PrintStream console, final PrintStream
+	 * arquivo) throws IOException { String texto; final SimpleDateFormat
+	 * simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
+	 * simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT-3:00")); texto =
+	 * "Fazendo Download dos resultados";
+	 * //System.out.print("Fazendo Download dos resultados");
+	 * CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
+	 * final HttpURLConnection myconnection = (HttpURLConnection) new URL(
+	 * "http://www1.caixa.gov.br/loterias/_arquivos/loterias/D_megase.zip" + "?_=" +
+	 * System.currentTimeMillis()).openConnection();
+	 * myconnection.setRequestMethod("GET"); final Date date = new
+	 * Date(myconnection.getLastModified()); final InputStream in =
+	 * myconnection.getInputStream(); final OutputStream out =
+	 * Files.newOutputStream(Paths.get("F:\\WrkPlc\\ZIP\\File_Zip_Mega.zip")); texto
+	 * += " para o arquivo : F:\\WrkPlc\\ZIP\\File_Zip_Mega.zip";
+	 * System.out.println(texto + " O arquivo é de : " +
+	 * simpleDateFormat.format(date)); System.setOut(console);
+	 * System.out.println(texto + " O arquivo é de : " +
+	 * simpleDateFormat.format(date)); System.setOut(arquivo);
+	 * //System.out.print(" para o arquivo : F:\\WrkPlc\\ZIP\\File_Zip_Mega.zip");
+	 * //System.out.println(" O arquivo é de : "+date); copy(in, out, 1024);
+	 * out.close(); in.close();
+	 * System.out.print("Download dos resultados completos. "); }
+	 */
+	public static double fatorial(final double num) {
+		if (num <= 1) {
+			return 1;
+		} else {
+			return num * fatorial(num - 1);
+		}
+	}
+
+	public static long geraHash(final byte[] serie) {
+		return (baseHash[serie[0]] + baseHash[serie[1]] + baseHash[serie[2]] + baseHash[serie[3]] + baseHash[serie[4]]
+				+ baseHash[serie[5]] + baseHash[serie[6]] + baseHash[serie[7]] + baseHash[serie[8]]
+				+ baseHash[serie[9]]);
+	}
+
+	private static void geraZerezima() {
+		System.out.println("Inicio da geração da Zerezima ");
+		Formula formula;
+		if (estamosEmTeste) {
+			/*
+			 * criaItem(39582419648512L); criaItem(35400204882086L);
+			 * criaItem(35404495655078L); criaItem(35400204888230L);
+			 * criaItem(41169422989614L); criaItem(35467853902248L);
+			 * criaItem(44330515636352L); criaItem(48663054463424L);
+			 * criaItem(42234574746021L); criaItem(35493619185957L);
+			 * criaItem(35640721801381L); criaItem(35645016768677L);
+			 * criaItem(35467853902248L); criaItem(493930938698L); criaItem(493930938506L);
+			 */
+			criaItemVer74(10078155717032L);
+			/// final Formula formulaTeste = new Formula(10078155717032L, false);
+			/// final String verificaFormula = formulaTeste.toString();
+			criaItemVer74(10071713266088L);
+			criaItemVer74(10081363311016L);
+			criaItemVer74(10218807497128L);
+			criaItemVer74(10218807503272L);
+			criaItemVer74(10214512535976L);
+			criaItemVer74(10214512529832L);
+			criaItemVer74(10115736674728L);
+			criaItemVer74(10077068343720L);
+			criaItemVer74(10081368553896L);
+			criaItemVer74(9909564613032L);
+			criaItemVer74(9905269645736L);
+			/*
+			 * criaItemVer74(10357328583080L); criaItemVer74(10348738648488L);
+			 * criaItemVer74(10353029421480L); criaItemVer74(10348734454184L);
+			 * criaItemVer74(10346586970536L); criaItemVer74(10342296197544L);
+			 * criaItemVer74(10342292003240L); criaItemVer74(10347660712360L);
+			 * criaItemVer74(10347664906664L); criaItemVer74(10356254835112L);
+			 * criaItemVer74(10244585697704L); criaItemVer74(10248880665000L);
+			 * criaItemVer74(493930938698L); criaItemVer74(493930938506L);
+			 * criaItemVer74(493935133002L); criaItemVer74(489641214094L);
+			 * criaItemVer74(493926744394L); criaItemVer74(493926750538L);
+			 * criaItemVer74(283478595726L); criaItemVer74(489631776906L);
+			 * criaItemVer74(496074166470L); criaItemVer74(493935132810L);
+			 * criaItemVer74(493930944842L); criaItemVer74(493926750346L);
+			 * criaItemVer74(489637019790L); criaItemVer74(489632825486L);
+			 * criaItemVer74(283482790030L); criaItemVer74(493931987086L);
+			 * criaItemVer74(425211603086L); criaItemVer74(425207408782L);
+			 * criaItemVer74(287769368718L); criaItemVer74(493926744202L);
+			 * criaItemVer74(420917557390L); criaItemVer74(420913363086L);
+			 * criaItemVer74(287768320330L); criaItemVer74(420920703118L);
+			 * criaItemVer74(7057719703686L); criaItemVer74(6915977388166L);
+			 * criaItemVer74(6911682420870L); criaItemVer74(6915980533898L);
+			 * criaItemVer74(6915980533892L); criaItemVer74(6915972145286L);
+			 * criaItemVer74(6768883317062L); criaItemVer74(6775325768006L);
+			 * criaItemVer74(6597076230470L); criaItemVer74(7054497425540L);
+			 * criaItemVer74(7054497419396L); criaItemVer74(7050202458244L);
+			 * criaItemVer74(7050202452100L); criaItemVer74(6906321057924L);
+			 * criaItemVer74(6906321051780L); criaItemVer74(7049128716426L);
+			 * criaItemVer74(7049128716420L); criaItemVer74(7049128710282L);
+			 * criaItemVer74(7049128710276L); criaItemVer74(6912763502724L);
+			 * criaItemVer74(7057718651018L); criaItemVer74(7057718651012L);
+			 * criaItemVer74(7057718644874L); criaItemVer74(7057718644868L);
+			 */
+			return;
+		}
+		System.out.println("Apurando potencial dos indices ");
+		final byte[][] indiceOrdem = testaFormulas(listaOrdemSorteio, colecao);
+		System.out.println("Apurado potencial dos indices ");
+		colecao = new Colecao();
+		byte cursorParImpPeso, cursorParImpTipo, cursorUltPQtdPeso, cursorUltPQtdTipo, cursorUltSorteioSB1Peso,
+				cursorUltSorteioSB1Tipo, cursorUltSorteioSB2Peso, cursorUltSorteioSB2Tipo, cursorUltSorteioPeso,
+				cursorUltSorteioTipo, cursorDropTipo;// , numeroDeIteracoes;
+		byte cursorUltPQtdSB1Peso, cursorUltPQtdSB1Tipo;
+		byte cursorCicloPeso, cursorCicloTipo, cursorMaioresPeso, cursorMaioresTipo, cursormonteCarloPeso,
+				cursormonteCarloTipo, cursorDropPeso;
+		// int profAnt=profundidade-1;
+		boolean inicial = true;
+		double numeroItens = 0;
+		/*
+		 * Indice Nome =======
+		 * =============================================================================
+		 * ====== 0 indices das dezenas mais sorteadas 1 Ultimo Ciclo 2 indices das
+		 * dezena sem sorteio 3 indices dos maiores intervalos sem sorteio 4 indices dos
+		 * menores intervalos (entre os intervalos maiores) sem sorteio 5 indices da
+		 * media dos intervalos nos ciclos de sorteios 6 Indice para comparacao com o
+		 * indice ptMseq do Rank Geral 7 Indice de distribuicao entre pares e impares 8
+		 * Indice de registro da pegada da onda 9 Indice de Monte Carlo
+		 *
+		 */
+		// numeroDeIteracoes = 3; // variando de 1 a 3.
+		System.out.println("Inicio da apuraçao das formulas; cada ponto 10.000.000 formulas.\n");
+		for (cursorParImpPeso = 0; cursorParImpPeso < profundidade; cursorParImpPeso++) {
+			for (cursorParImpTipo = 0; cursorParImpTipo < (cursorParImpPeso == 0 ? 1
+					: numeroDeIteracoes); cursorParImpTipo++) {
+				for (cursorUltPQtdPeso = 0; cursorUltPQtdPeso < profundidade; cursorUltPQtdPeso++) {
+					for (cursorUltPQtdTipo = 0; cursorUltPQtdTipo < (cursorUltPQtdPeso == 0 ? 1
+							: 1); cursorUltPQtdTipo++) { /// Alterado de ? 1: numeroDeIteracoes para ? 1: 1
+						for (cursorUltSorteioSB1Peso = 0; cursorUltSorteioSB1Peso < profundidade; cursorUltSorteioSB1Peso++) {
+							for (cursorUltSorteioSB1Tipo = 0; cursorUltSorteioSB1Tipo < (cursorUltSorteioSB1Peso == 0
+									? 1
+									: numeroDeIteracoes); cursorUltSorteioSB1Tipo++) {
+								for (cursorUltSorteioSB2Peso = 0; cursorUltSorteioSB2Peso < profundidade; cursorUltSorteioSB2Peso++) {
+									for (cursorUltSorteioSB2Tipo = 0; cursorUltSorteioSB2Tipo < (cursorUltSorteioSB2Peso == 0
+											? 1
+											: numeroDeIteracoes); cursorUltSorteioSB2Tipo++) {
+										for (cursorUltSorteioPeso = 0; cursorUltSorteioPeso < profundidade; cursorUltSorteioPeso++) {
+											for (cursorUltSorteioTipo = 0; cursorUltSorteioTipo < (cursorUltSorteioPeso == 0
+													? 1
+													: numeroDeIteracoes); cursorUltSorteioTipo++) {
+												for (cursorUltPQtdSB1Peso = 0; cursorUltPQtdSB1Peso < profundidade; cursorUltPQtdSB1Peso++) {
+													for (cursorUltPQtdSB1Tipo = 0; cursorUltPQtdSB1Tipo < (cursorUltPQtdSB1Peso == 0
+															? 1
+															: 1); cursorUltPQtdSB1Tipo++) { /// Alterado de ? 1:
+																							/// numeroDeIteracoes para ?
+																							/// 1: 1
+														for (cursorCicloPeso = 0; cursorCicloPeso < profundidade; cursorCicloPeso++) {
+															for (cursorCicloTipo = 0; cursorCicloTipo < (cursorCicloPeso == 0
+																	? 1
+																	: numeroDeIteracoes); cursorCicloTipo++) {
+																for (cursorMaioresPeso = 0; cursorMaioresPeso < profundidade; cursorMaioresPeso++) {
+																	for (cursorMaioresTipo = 0; cursorMaioresTipo < (cursorMaioresPeso == 0
+																			? 1
+																			: numeroDeIteracoes); cursorMaioresTipo++) {
+																		for (cursormonteCarloPeso = 0; cursormonteCarloPeso < profundidade; cursormonteCarloPeso++) {
+																			for (cursormonteCarloTipo = 0; cursormonteCarloTipo < (cursormonteCarloPeso == 0
+																					? 1
+																					: numeroDeIteracoes); cursormonteCarloTipo++) {
+																				for (cursorDropPeso = 0; cursorDropPeso < profundidade; cursorDropPeso++) {
+																					for (cursorDropTipo = 0; cursorDropTipo < (cursorDropPeso == 0
+																							? 1
+																							: numeroDeIteracoes); cursorDropTipo++) {
+																						if (inicial) {
+																							inicial = false;
+																							continue;
+																						}
+																						/*
+																						 * if (continuidade) { if
+																						 * (cursorParImpPeso<profAnt) {
+																						 * if
+																						 * (cursorUltPQtdPeso<profAnt) {
+																						 * if (cursorUltSorteioSB1Peso<
+																						 * profAnt) { if
+																						 * (cursorUltSorteioSB2Peso<
+																						 * profAnt) { if
+																						 * (cursorUltSorteioPeso<
+																						 * profAnt) { //if
+																						 * (cursorUltPQtdSB1Peso<
+																						 * profAnt) { if
+																						 * (cursorCicloPeso<profAnt) {
+																						 * if
+																						 * (cursorMaioresPeso<profAnt) {
+																						 * if (cursormonteCarloPeso<
+																						 * profAnt) { //nTotFora++;
+																						 * continue; } } //} } } } } } }
+																						 * }
+																						 */
+																						formula = new Formula(true, // filtro,
+																													// Com
+																								// filtro de Darhal
+																								new Componente(
+																										indiceOrdem[0][cursorMaioresTipo],
+																										cursorMaioresPeso),
+																								new Componente(
+																										indiceOrdem[2][cursorUltSorteioTipo],
+																										cursorUltSorteioPeso),
+																								// new Componente((byte)
+																								// 0, (byte) 0),
+																								new Componente(
+																										indiceOrdem[6][cursorUltPQtdSB1Tipo],
+																										cursorUltPQtdSB1Peso),
+																								new Componente(
+																										indiceOrdem[7][cursorParImpTipo],
+																										cursorParImpPeso),
+																								new Componente(
+																										indiceOrdem[1][cursorCicloTipo],
+																										cursorCicloPeso),
+																								new Componente(
+																										indiceOrdem[5][cursorUltPQtdTipo],
+																										cursorUltPQtdPeso),
+																								new Componente(
+																										indiceOrdem[3][cursorUltSorteioSB1Tipo],
+																										cursorUltSorteioSB1Peso),
+																								new Componente(
+																										indiceOrdem[4][cursorUltSorteioSB2Tipo],
+																										cursorUltSorteioSB2Peso),
+																								new Componente(
+																										indiceOrdem[9][cursormonteCarloTipo],
+																										cursormonteCarloPeso),
+																								new Componente(
+																										indiceOrdem[8][cursorDropTipo],
+																										cursorDropPeso));
+																						rankCalibragemFinal
+																								.add(new Calibragem(
+																										formula.base));
+																						formula.resetFiltro(); // Sem o
+																												// filtro
+																												// de
+																												// Darhal
+																						rankCalibragemFinal
+																								.add(new Calibragem(
+																										formula.base));
+																						numeroItens += 2;
+																						if (((numeroItens
+																								% 10_000_000) == 0)) {
+																							System.out.print(".");
+																						}
+																						/*
+																						 * if
+																						 * (rankCalibragemFinal.size()>
+																						 * 1000000) { System.out.
+																						 * println("Final forçado da geração da Zerezima com "
+																						 * +textNum(rankCalibragemFinal.
+																						 * size())
+																						 * +" formulas geradas.");
+																						 * return; }
+																						 */
+																					}
+																				} //// ---- for
+																					//// cursorPesoPontuacaoSemSorteio
+																			}
+																		} //// ---- for cursornPesoPontuacaoMaiores
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		// numeroItens -= 2;
+		// final StringBuilder sb = new StringBuilder();
+		// final Formatter formatter = new Formatter(sb, Locale.GERMAN);
+		// formatter.format("$ %(,.0f", numeroItens);
+		// System.out.println("Amount is - " + sb);
+		// System.out.println("Final da geração da Zerezima para " + numeroDeIteracoes +
+		// " iteracoes com " + sb
+		// + " formulas geradas.");
+		System.out.println(
+				"Final da geração da Zerezima com " + textNum(rankCalibragemFinal.size()) + " formulas geradas.");
+	}
+
+	/*
+	 * public static List<byte[]> readFileZIP(final boolean verificaData, final
+	 * PrintStream console, final PrintStream arquivo) { final BufferedReader br =
+	 * null; int numColuna = 1; final List<byte[]> numSorteados = new ArrayList<>();
+	 * final byte anExample[] = new byte[6]; try { if (nomeZipDados.length() == 0) {
+	 * nomeZipDados = "F:\\WrkPlc\\ZIP\\File_Zip_Mega.zip"; } final ZipFile zipFile
+	 * = new ZipFile(nomeZipDados); // NOPMD by mailj on 14/07/2019 18:05 final
+	 * Enumeration<? extends ZipEntry> entries = zipFile.entries(); String
+	 * rateioSenaTemp = ""; String rateioQuinaTemp = ""; String rateioQuadraTemp =
+	 * ""; boolean prt; final SimpleDateFormat simpleDateFormat = new
+	 * SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
+	 * simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT-3:00")); while
+	 * (entries.hasMoreElements()) { final ZipEntry zipEntry =
+	 * entries.nextElement(); if (!zipEntry.isDirectory()) { final String fileName =
+	 * zipEntry.getName(); if (fileName.equalsIgnoreCase("D_MEGA.HTM")) { final Date
+	 * lastModified = new Date(zipEntry.getTime()); final LocalDate lm =
+	 * lastModified.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(); final
+	 * LocalDate hoje = LocalDate.now(); final long dias = lm.until(hoje,
+	 * ChronoUnit.DAYS); if (dias > 7) {
+	 * System.out.println("\n*******************  URGENTE ARQUIVO D_MEGA.HTM (" +
+	 * lm.toString() + ") TEM " + dias +
+	 * " DIAS. VERIFICAR SE NAO ESTA ERRADO NA FONTE (CAIXA) ************************"
+	 * ); } else { System.out.println("O arquivo de dados D_MEGA.HTM (" +
+	 * simpleDateFormat.format(lastModified) + ") " + (dias == 0 ? "e de hoje." :
+	 * "tem " + dias + " dia" + ((dias > 1) ? "s" : "") + "."));
+	 * //System.out.println("O arquivo de dados D_MEGA.HTM (" + lm.toString() + ") "
+	 * // + (dias == 0 ? "e de hoje." // : "tem " + dias + " dia" + ((dias > 1) ?
+	 * "s" : "") + ".")); } if (verificaData) { System.setOut(console); if (dias >
+	 * 7) { System.out.println("\n*******************  URGENTE ARQUIVO D_MEGA.HTM ("
+	 * + simpleDateFormat.format(lastModified) + ") TEM " + dias +
+	 * " DIAS. VERIFICAR SE NAO ESTA ERRADO NA FONTE (CAIXA) ************************"
+	 * ); } else { System.out.println("O arquivo de dados D_MEGA.HTM (" +
+	 * simpleDateFormat.format(lastModified) + ") " + (dias == 0 ? "e de hoje." :
+	 * "tem " + dias + " dia" + ((dias > 1) ? "s" : "") + ".")); }
+	 * System.setOut(arquivo); } final InputStream input =
+	 * zipFile.getInputStream(zipEntry); final BufferedReader mybr = new
+	 * BufferedReader(new InputStreamReader(input, "UTF-8")); String line = ""; prt
+	 * = false; while ((line = mybr.readLine()) != null) { if
+	 * (line.contains("</tr>")) { if (numColuna != 0) { numColuna = 0; prt = true; }
+	 * continue; } else if (!line.contains("<td rowspan")) { continue; } if
+	 * (line.contains("&nbsp")) { continue; } if (prt) { line =
+	 * line.replaceAll("</td>", "").replaceAll("<.*>", ""); if (numColuna == 0) {
+	 * numSorteio = Short.parseShort(line); } if (numColuna == 1) { dataSorteio =
+	 * line; } else if (numColuna == 9) { qtdGandoresSena = Short.parseShort(line);
+	 * } else if (numColuna == 10) { if (qtdGandoresSena != 0) { rateioSenaTemp =
+	 * line; } // } else if (numColuna==11) { // qtd ganhadores da Quina ; } else if
+	 * (numColuna == 12) { rateioQuinaTemp = line; // } else if (numColuna==13) { //
+	 * qtd ganhadores da Quadra ; } else if (numColuna == 14) { rateioQuadraTemp =
+	 * line; // } else if (numColuna==15) { // acumulado sim/nao } else if
+	 * (numColuna == 15) { acumulada = line; } else if (numColuna == 16) {
+	 * valorAcumulado = line; } else if (numColuna == 17) { estimativaPremio = line;
+	 * } if (numColuna > 1 & numColuna < 8) { anExample[numColuna - 2] =
+	 * Byte.parseByte(line); } else if (numColuna == 8) {
+	 * numSorteados.add(anExample.clone()); } numColuna++; } } //// Ponto para
+	 * entrada manual do sorteio. ///// anExample[] = {1,2,3,4,5,6}; ////
+	 * numSorteados.add(anExample.clone()); rateioSena =
+	 * Double.parseDouble(rateioSenaTemp.replace(".", "").replace(",", "."));
+	 * rateioQuina = Double.parseDouble(rateioQuinaTemp.replace(".",
+	 * "").replace(",", ".")); rateioQuadra =
+	 * Double.parseDouble(rateioQuadraTemp.replace(".", "").replace(",", "."));
+	 * mybr.close(); // zipInput.closeEntry(); input.close(); zipFile.close();
+	 * break; } } } } catch (final FileNotFoundException ex) { ex.printStackTrace();
+	 * } catch (final IOException ex) { ex.printStackTrace(); } finally { try { if
+	 * (br != null) { br.close(); } return numSorteados; } catch (final IOException
+	 * ex) { ex.printStackTrace(); } } return numSorteados; }
+	 * 
+	 */
+	private static int getConcurso(final String url) {
+		JSONObject jsonResponse = null;
+		try {
+			jsonResponse = getJsonFromUrl(url);
+		} catch (final Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return jsonResponse.getInt("numero");
+	}
+
+	public static String getHMS(long t1) {
+		t1 = System.currentTimeMillis() - t1;
+		return getHMSPuro(t1) + " (" + t1 + ")";
+	}
+
+	public static String getHMSPuro(long t1) {
+		// t1 = System.currentTimeMillis() - t1;
+		return String.format("%02d:%02d:%02d.%03d", TimeUnit.MILLISECONDS.toHours(t1),
+				TimeUnit.MILLISECONDS.toMinutes(t1) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(t1)),
+				TimeUnit.MILLISECONDS.toSeconds(t1) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(t1)),
+				t1 - (t1 / 1000) * 1000);
+	}
+
+	private static JSONObject getJsonFromUrl(final String url) throws Exception {
+		// final HttpURLConnection connection = (HttpURLConnection) new
+		// URL(url).openConnection();
+		final HttpURLConnection connection = (HttpURLConnection) new URI(url).toURL().openConnection();
+		connection.setRequestMethod("GET");
+		final BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		String inputLine;
+		final StringBuilder content = new StringBuilder();
+		while ((inputLine = in.readLine()) != null) {
+			content.append(inputLine);
+		}
+		in.close();
+		connection.disconnect();
+		return new JSONObject(content.toString());
+	}
+
+	private static String getSequencia(final String local, final String string) throws IOException {
+		final FileFilter filter = file -> file.getName().startsWith(string) & file.getName().endsWith(".txt");
+		final File dir = new File(local);
+		final File[] files = dir.listFiles(filter);
+		final int proximo = files.length + 1;
+		final SimpleDateFormat formatoData = new SimpleDateFormat("_ddMMyyyy_HHmmss");
+		formatoData.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+		final Calendar data = Calendar.getInstance();
+		return local + "\\" + string + proximo + formatoData.format(data.getTime()) + ".txt";
+	}
+	// private static void getSorteio() {
+	// try {
+	// //final String texto;
+	// CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
+	// final HttpURLConnection myconnection = (HttpURLConnection) new URL(
+	// "http://www1.caixa.gov.br/loterias/_arquivos/loterias/D_megase.zip" + "?_="
+	// + System.currentTimeMillis()).openConnection();
+	// /*
+	// final HttpURLConnection myconnection = (HttpURLConnection) new URL(
+	// "http://200.201.171.210/loterias/_arquivos/loterias/D_megase.zip" + "?_="
+	// + System.currentTimeMillis()).openConnection();
+	// */
+	// myconnection.setRequestMethod("GET");
+	// //final Date date = new Date(myconnection.getLastModified());
+	// final InputStream in = myconnection.getInputStream();
+	// final OutputStream out =
+	// Files.newOutputStream(Paths.get("F:\\WrkPlc\\ZIP\\File_Zip_Mega.zip"));
+	// //texto += " para o arquivo : F:\\WrkPlc\\ZIP\\File_Zip_Mega.zip";
+	// //System.out.println(texto + " O arquivo é de : " +
+	// simpleDateFormat.format(date));
+	// //System.setOut(console);
+	// //System.out.println(texto + " O arquivo é de : " +
+	// simpleDateFormat.format(date));
+	// //System.setOut(arquivo);
+	// //System.out.print(" para o arquivo : F:\\WrkPlc\\ZIP\\File_Zip_Mega.zip");
+	// //System.out.println(" O arquivo é de : "+date);
+	// copy(in, out, 1024);
+	// out.close();
+	// in.close();
+	// //System.out.print("Download dos resultados completos. ");
+	// } catch (final IOException e) {
+	// System.out.println("General I/O exception: " + e.getMessage());
+	// e.printStackTrace();
+	// System.out.println(" * ** ** ** ** ** ** *** ******** *** *** ** ** ** * *
+	// *");
+	// System.out.println(" * ** ** ** ** ** ** *** *** *** ** ** ** * * *");
+	// System.out.println(" * ** ** ** ** ** ** *** URGENTE *** *** ** ** ** * *
+	// *");
+	// System.out.println(" * ** ** ** ** ** ** *** *** *** ** ** ** * * *");
+	// System.out.println(" * ** ** ** ** ** ** *** ********* *** *** ** ** ** * *
+	// *");
+	// }
+	// /*
+	// * PrintStream arquivo = null;//
+	//
+	// try {
+	// arquivo = new PrintStream(new File(nomeTxtFile));
+	// } catch (final FileNotFoundException e1) {
+	//
+	// e1.printStackTrace();
+	// }
+	// */
+	// readFileZIP(false, null, null);
+	// }
+
+	private static void gravaRankCalibragem(final int numSorteioInterno) {
+		gravaRankCalibragem(nomeRankCalibragem, numSorteioInterno);
+	}
+
+	private static void gravaRankCalibragem(String nomeRankCalibragem, final int numSorteioInterno) {
+		if (continuidade) {
+			nomeRankCalibragem = "Continuidade.txt";
+		}
+		final SimpleDateFormat format = new SimpleDateFormat();
+		format.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+		try {
+			// if (!estamosEmTeste) {
+			System.out.print("\nIniciando a gravação da calibragem dos fatores. "
+					+ format.format(GregorianCalendar.getInstance().getTime()) + "\n");
+			// }
+			// Vou verificar se ja existe o arquivo tmp, e se existir vou remover
+			final String nomeTmp = nomeRankCalibragem + ".tmp";
+			final File fileTmp = new File(nomeTmp);
+			if (fileTmp.exists()) {
+				fileTmp.delete();
+			}
+			final BufferedWriter arq = Files.newBufferedWriter(Paths.get(nomeTmp), StandardCharsets.UTF_8);
+			final PrintWriter gravarArq = new PrintWriter(arq);
+			Calibragem item = new Calibragem();
+			final int fim = rankCalibragemFinal.size();
+			final int divisor = (fim - 10) / 10;
+			Double percentGravado;
+			for (int i = 0; i < fim; i++) {
+				item = rankCalibragemFinal.get(i);
+				if (item.baseFormula != 0) {
+					gravarArq.printf(item.toString() + "%n");
+				}
+
+				// if (!estamosEmTeste) {
+				if (i % divisor == 0 & i > 0) {
+					percentGravado = (double) i;
+					percentGravado /= fim;
+					percentGravado *= 100;
+					System.out.println("gravado " + textNumInt(i) + "/ " + textNumInt(fim) + " itens ("
+							+ String.format("%3.0f", percentGravado) + "%). "
+							+ format.format(GregorianCalendar.getInstance().getTime()));
+				}
+				// }
+			}
+			gravarArq.printf("#" + numSorteioInterno);
+			gravarArq.close();
+			arq.close();
+			// Vou verificar se ja existe o arquivo nomeRankCalibragem, e se existir vou
+			// remover
+			final File fileNomeRankCalibragem = new File(nomeRankCalibragem);
+			if (fileNomeRankCalibragem.exists()) {
+				fileNomeRankCalibragem.delete();
+			}
+			new File(nomeTmp).renameTo(new File(nomeRankCalibragem));
+			// if (!estamosEmTeste) {
+			System.out.print("\nRank da calibragem dos fatores salvo com sucesso como " + nomeRankCalibragem + " .\n");
+			// }
+		} catch (final IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+	private static void gravaRankCalPrint(String nomeRankCalPrint, List<Calibragem> rankCalibragemTemp, int fim) {
+		final SimpleDateFormat format = new SimpleDateFormat();
+		format.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+		try {
+			// if (!estamosEmTeste) {
+			System.out.print("\nIniciando a gravação do Rank Impressão "+nomeRankCalPrint
+					+" "+ format.format(GregorianCalendar.getInstance().getTime()) + "\n");
+			// }
+			// Vou verificar se ja existe o arquivo tmp, e se existir vou remover
+			final BufferedWriter arq = Files.newBufferedWriter(Paths.get(nomeRankCalPrint), StandardCharsets.UTF_8);
+			final PrintWriter gravarArq = new PrintWriter(arq);
+			Calibragem item = new Calibragem();
+			//final int fim = rankCalibragemFinal.size();
+			//final int divisor = (fim - 10) / 10;
+			//Double percentGravado;
+			for (int i = 0; i < fim; i++) {
+				//item = rankCalibragemFinal.get(i);
+				item = rankCalibragemTemp.get(i);
+				//rankCalibragemTemp.add(item);
+				if (item.baseFormula != 0) {
+					gravarArq.printf(item.toString() + "%n");
+				}
+			}
+			gravarArq.close();
+			arq.close();
+			// Vou verificar se ja existe o arquivo nomeRankCalibragem, e se existir vou
+			// remover
+			
+			System.out.print("\nRank da calibragem dos fatores salvo com sucesso como " + nomeRankCalPrint + " .\n");
+			// }
+		} catch (final IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+
+	public static boolean isMegaSemana(LocalDate data) {
+		while (data.getDayOfWeek().getValue() < 2 | data.getDayOfWeek().getValue() > 5) {
+			data = data.plusDays(1); // from 1 (Monday) to 7 (Sunday)
+		}
+		;
+		final LocalDate[] megaSemanas = setMegaSemana();// new LocalDate[8];
+		// Registrar a terca feira da semana
+		/*
+		 * megaSemanas[0] = LocalDate.of(2021, 01, 26); megaSemanas[1] =
+		 * LocalDate.of(2021, 04, 6); megaSemanas[2] = LocalDate.of(2021, 05, 4);
+		 * megaSemanas[3] = LocalDate.of(2021, 6, 29); megaSemanas[4] =
+		 * LocalDate.of(2021, 8, 10); megaSemanas[5] = LocalDate.of(2021, 10, 29);
+		 * megaSemanas[6] = LocalDate.of(2021, 10, 19); megaSemanas[7] =
+		 * LocalDate.of(2021, 12, 7);
+		 */
+		LocalDate dataFinal;
+		for (int i = 0; i < 8; i++) {
+			dataFinal = megaSemanas[i].plusDays(4);
+			if ((data.isEqual(megaSemanas[i]) | data.isAfter(megaSemanas[i]))
+					& (data.isEqual(dataFinal) | data.isBefore(dataFinal))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static short lastSorteio() throws Exception {
+		try {
+			// URL correta da API
+			final String url = "https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena";
+			final JSONObject jsonResponse = getJsonFromUrl(url);
+			final short sorteio = (short) jsonResponse.getInt("numero");
+			return sorteio;
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	public static void main(final String[] args) throws Exception {
+		// System.out.println(" Lista dos até ");
+		//Calibragem testeCalibragem = new Calibragem();
+		//Calibragem.calcularProbabilidadesTeoricas();
+		//System.out.println(" Lista dos até "+ Arrays.toString(Calibragem.probs));
+		//calcularProbabilidadesTeoricas() 
+		//HypergeometricDistribution dist2 = new HypergeometricDistribution(60, 6, 10);
+		//double[] prob = new double[6];
+		//for (int k = 0; k < 6; k++) {
+			
+		//	prob[k] = dist2.probability(k + 1);
+		//}
+		//System.out.println(" Lista dos até "+ Arrays.toString(prob));
+		//if (true) {
+		//return;
+		//}
+		boolean aquivoZipInformado = false;
+		boolean aquivoRnkInformado = false;
+		boolean aquivoTxtInformado = false;
+		boolean profundidadeInformada = false;
+		boolean inclusaoInformada = false;
+		boolean waitSorteio = false;
+		boolean verificaData = false;
+		boolean soVerificaData = false;
+		boolean lerTxtInformado = false;
+		continuidade = false;
+		boolean semNovoCalculo = false;
+		final byte[] sorteioParaIncluir = new byte[6];
+		final File flagSaidaForcada = new File("saidaForcada.flg");
+		// for (byte contador = 1; contador < 61; contador++) {
+		// baseHash[contador] = (1L << (contador - 1));
+		// }
+		//
+		// ********************************************************************************************
+		/*
+		 * * final byte[][] indice = { { 0, 0, 1 }, { 0, 1, 0 }, { 0, 1, 1 }, { 1, 0, 0
+		 * }, { 1, 0, 1 }, { 1, 1, 0 }, { 0, 0, 2 }, { 0, 2, 0 }, { 0, 2, 2 }, { 2, 0, 0
+		 * }, { 2, 0, 2 }, { 2, 2, 0 } }; if (nomeTxtFile.length() == 0) { //
+		 * nomeRankCalibragem = nomeRankCalibragem; // } else { nomeTxtFile =
+		 * getSequencia("F:\\WrkPlc\\Relatorios", "Lixo_v_" + ver + "-"); }
+		 * saidaSolicitada = false; // File saidaGeral; // saidaGeral = new
+		 * File(nomeTxtFile); final PrintStream arquivox = new PrintStream(new
+		 * File(nomeTxtFile)); final PrintStream consolex = System.out;
+		 * bestNumbers(indice, arquivox, consolex, true); //
+		 * *****************************************************************************
+		 * *******************
+		 */
+		if (flagSaidaForcada.exists()) {
+			flagSaidaForcada.delete();
+			System.out.println("Saida forçada pelo flag detectada no inicio do processamento. Arquivo apagado!");
+		}
+		if (args.length > 0) {
+			for (final String argument : args) {
+				if (aquivoZipInformado) {
+					nomeZipDados = argument;
+					aquivoZipInformado = false;
+					continue;
+				}
+				if (aquivoRnkInformado) {
+					if (continuidade) {
+						System.out.println("Os parametro ( -R nomeRank e -C ) não podem ser utilizados conjuntamente");
+						return;
+					}
+					nomeRankCalibragem = argument;
+					nomeRankCalibragemCarga = nomeRankCalibragem;
+					aquivoRnkInformado = false;
+					continue;
+				}
+				if (aquivoTxtInformado) {
+					nomeTxtFile = argument;
+					aquivoTxtInformado = false;
+					continue;
+				}
+				if (waitSorteio) {
+					sorteioParaAguardar = Integer.parseInt(argument);
+					if (sorteioParaAguardar == 9999) {
+						/// getSorteio();
+						/// sorteioParaAguardar = numSorteio + 1;
+						sorteioParaAguardar = lastSorteio() + 1;
+					}
+					waitSorteio = false;
+					continue;
+				}
+				if (profundidadeInformada) {
+					profundidade = Byte.parseByte(argument);
+					if (profundidade > 8 | profundidade < 2) {
+						System.out.println(
+								"A profundidade permitida deve estar entre os níveis de 2 até 8 e a profundidade informada foi de "
+										+ profundidade);
+						return;
+					}
+					ver = ver.substring(0, 5) + profundidade;
+					profundidadeInformada = false;
+					continue;
+				}
+				if (inclusaoInformada) {
+					// System.out.println(" o argumento chegou assim :|" + argument + "|");
+					String[] tempArray;
+					// argument = argument.replaceAll("\\.", ",");
+					// argument = argument.replace("(", "");
+					// argument = argument.replace(")", "");
+					// System.out.println(" e ficou assim apos 3 o replaces ) :|" + argument + "|");
+					tempArray = argument.replace("(", "").replace(")", "").split("\\.");
+					// System.out.println(" e ficou assim apos 4 o replaces ) :|" +
+					// Arrays.toString(tempArray) + "|");
+					if (tempArray.length != 6) {
+						System.out.println(
+								"É necessário informar as 6 dezenas do sorteio a ser incluído. Foram informadas "
+										+ tempArray.length + " dezenas.");
+						return;
+					}
+					for (byte n = 0; n < 6; n++) {
+						sorteioParaIncluir[n] = Byte.parseByte(tempArray[n]);
+						if (sorteioParaIncluir[n] < 1 | sorteioParaIncluir[n] > 60) {
+							System.out
+									.println("Dezena informada fora do intervalo entre 1 e 60. Dezena informada foi : "
+											+ sorteioParaIncluir[n] + " .");
+							return;
+						}
+					}
+					for (byte n = 0; n < 5; n++) {
+						for (byte k = (byte) (n + 1); k < 6; k++) {
+							if (sorteioParaIncluir[n] == sorteioParaIncluir[k]) {
+								System.out.println("As dezenas informadas : " + (n + 1) + " (" + sorteioParaIncluir[n]
+										+ ") e " + (k + 1) + " (" + sorteioParaIncluir[k] + ") são iguais. ");
+								return;
+							}
+						}
+					}
+					inclusaoInformada = false;
+					continue;
+				}
+				if (argument.toUpperCase().equals("-V")) {
+					System.out.print(ver);
+					return;
+				}
+				if (argument.toUpperCase().equals("-D")) {
+					verificaData = true;
+					continue;
+				}
+				if (argument.toUpperCase().equals("-Q")) {
+					soVerificaData = true;
+					continue;
+				}
+				if (argument.toUpperCase().equals("-Z")) {
+					aquivoZipInformado = true;
+					continue;
+				}
+				if (argument.toUpperCase().equals("-R")) {
+					aquivoRnkInformado = true;
+					continue;
+				}
+				if (argument.toUpperCase().equals("-T")) {
+					aquivoTxtInformado = true;
+					continue;
+				}
+				if (argument.toUpperCase().equals("-P")) {
+					profundidadeInformada = true;
+					continue;
+				}
+				if (argument.toUpperCase().equals("-I")) {
+					inclusaoInformada = true;
+					continue;
+				}
+				if (argument.toUpperCase().equals("-X")) {
+					lerTxtInformado = true;
+					continue;
+				}
+				if (argument.toUpperCase().equals("-W")) {
+					waitSorteio = true;
+					continue;
+				}
+				if (argument.toUpperCase().equals("-C")) {
+					if (nomeRankCalibragem.length() != 0) {
+						System.out.println("Os parametro ( -R nomeRank e -C ) não podem ser utilizados conjuntamente");
+						return;
+					}
+					continuidade = true;
+					continue;
+				}
+				if (argument.toUpperCase().equals("-H") | argument.toUpperCase().equals("-?")) {
+					System.out.println(
+							"Sorteados [-v] [-x] [ [-z nomeArquiviZip] ou  [-c] ] [-r nomeArquivoRank] [-p numeroDaProfundidade {2-8}] [-t nomeArquivodeSaida] [-d] [-q] "
+									+ "[-i IncluirSorteio {(Dez01.Dez02.Dez03.Dez04.Dez05.Dez06)}] -w [numeroSorteio|9999]");
+					return;
+				} else {
+					System.out.println("Parametro (" + argument
+							+ ") não reconhecido como parametro válido. Os parametros válidos são:");
+					System.out.println(
+							"Sorteados [-v]  [-x] [ [-z nomeArquiviZip] ou  [-c] ] [-r nomeArquivoRank] [-p numeroDaProfundidade {2-8}] [-t nomeArquivodeSaida] [-d] [-q] "
+									+ "[-i IncluirSorteio {(Dez01.Dez02.Dez03.Dez04.Dez05.Dez06)}] -w [numeroSorteio|9999]");
+					return;
+				}
+			}
+		}
+		if (inclusaoInformada) {
+			System.out.println(
+					"Quando utilizado o parâmetro -i, é necessário informar as 6 dezenas do sorteio a serem incluídas. Não foram informadas nenhuma dezena.");
+			return;
+		}
+		// nomeZipDados="c:\\$JRR\\Java\\Mega\\src\\File_Zip_Mega.zip";
+		// nomeRankCalibragem="c:\\$JRR\\Java\\Mega\\teste08\\RankCalibragem58-3.txt";
+		final long tInicialDoPrograma = System.currentTimeMillis();
+		if (nomeRankCalibragem.length() == 0) {
+			// nomeRankCalibragem = nomeRankCalibragem;
+			// } else {
+			nomeRankCalibragem = "RankCalibragem" + ver + ".txt";
+			if (continuidade) {
+				final File fileCont = new File("Continuidade.txt");
+				if (fileCont.exists()) {
+					nomeRankCalibragemCarga = "Continuidade.txt";
+				} else {
+					nomeRankCalibragemCarga = "RankCalibragem" + (ver.substring(0, 3) + (profundidade - 1)) + ".txt";
+				}
+			} else {
+				nomeRankCalibragemCarga = nomeRankCalibragem;
+			}
+		}
+		if (nomeTxtFile.length() == 0) {
+			// nomeRankCalibragem = nomeRankCalibragem;
+			// } else {
+			nomeTxtFile = getSequencia("F:\\WrkPlc\\Relatorios", "Lixo_v_" + ver + "-");
+		}
+		saidaSolicitada = false;
+		// File saidaGeral;
+		// saidaGeral = new File(nomeTxtFile);
+		final PrintStream arquivo = new PrintStream(new File(nomeTxtFile));
+		final PrintStream console = System.out;
+		System.setOut(arquivo);
+		final File f = new File(".");
+		final Date d = GregorianCalendar.getInstance().getTime();
+		final SimpleDateFormat format = new SimpleDateFormat();
+		format.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+		// System.out.println("\nO programa esta executando no "+ f.getAbsolutePath());
+		if (sorteioParaAguardar > 0 & sorteioParaIncluir[0] == 0) {
+			System.setOut(console);
+			waitSorteio(sorteioParaAguardar);
+			System.setOut(arquivo);
+		}
+		System.out.println("Parâmetros do processamento : " + Arrays.toString(args).replace(",", "")
+				+ "\nO programa esta executando no " + f.getAbsolutePath() + "\nVersão do programa : " + ver
+				+ "\nVersão do java : " + System.getProperty("java.version") + "\nVersão do JRE  : "
+				+ System.getProperty("java.runtime.version") + "\nProcessado com "
+				+ Runtime.getRuntime().availableProcessors()
+				+ " processadores.E com a memória disponível para o processamento de "
+				+ (Runtime.getRuntime().maxMemory() / (double) (1000 * 1000 * 1000)) + " GB."
+				+ "\nProfundidade da calibragem em nível :" + profundidade
+				+ "\nO relatório irá calcular para jogos de " + NUMMAXDEZENAS + " dezenas."
+				+ "\nArquivo base de dados do rank :"
+				+ ((nomeRankCalibragem.length() == 0)
+						? " não fornecido (sera utilizado o arquivo " + "RankCalibragem" + ver + ".txt" + " )."
+						: nomeRankCalibragem)
+				+ "\nArquivo base de dados dos sorteios:"
+				+ ((nomeZipDados.length() == 0) ? " não fornecido (será baixado novo arquivo da Caixa)." : nomeZipDados)
+				+ "\nProcessado em :" + format.format(d));
+		colecao = new Colecao();
+		System.out.println();
+		if (lerTxtInformado) {
+			/// incluir leitura txt
+			listaOrdemSorteio = readFileTXT(verificaData, console, arquivo);
+		} else {
+			if (nomeZipDados.length() > 0) {
+				System.out.println("Usando arquivo ZIP " + nomeZipDados);
+			} else {
+				/*
+				 * ///try { ///downloadZIP(console, arquivo); } catch (final IOException e) {
+				 * System.out.
+				 * println(" * ** ** ** ** ** ** ***   ********     *** *** ** ** ** *  * *");
+				 * System.out.
+				 * println(" * ** ** ** ** ** ** ***                *** *** ** ** ** *  * *");
+				 * System.out.
+				 * println(" * ** ** ** ** ** ** ***    URGENTE     *** *** ** ** ** *  * *");
+				 * System.out.
+				 * println(" * ** ** ** ** ** ** ***                *** *** ** ** ** *  * *");
+				 * System.out.
+				 * println(" * ** ** ** ** ** ** ***   *********    *** *** ** ** ** *  * *");
+				 * System.out.println(
+				 * "Nao foi possivel baixar os resultados da Caixa, vou verificar se existe um arquivo antigo para o processamento."
+				 * ); } } ///
+				 */
+				// Carrego o arquivo texto com os resultados na ordem que foram sorteados
+				listaOrdemSorteio = readAPI(verificaData, console, arquivo);
+			}
+		}
+		if (sorteioParaIncluir[0] != 0) {
+			// Testa se sorteio para ser incluido já não consta na lista
+			final int lstReg = listaOrdemSorteio.size() - 1;
+			final byte[] sorteioParaComparar = listaOrdemSorteio.get(lstReg);
+			if (Arrays.equals(sorteioParaComparar, sorteioParaIncluir)) {
+				System.setOut(console);
+				System.out.println("Não foi adicionado manualmente o sorteio de numero " + numSorteio
+						+ " com as seguintes dezenas: " + Arrays.toString(sorteioParaIncluir) + " .");
+				System.setOut(arquivo);
+				System.out.println("Não foi adicionado manualmente o sorteio de numero " + numSorteio
+						+ " com as seguintes dezenas: " + Arrays.toString(sorteioParaIncluir) + " .");
+			} else {
+				listaOrdemSorteio.add(sorteioParaIncluir);
+				numSorteio++;
+				System.setOut(console);
+				System.out.println("Estamos adicionando manualmente o sorteio de numero " + numSorteio
+						+ " com as seguintes dezenas: " + Arrays.toString(sorteioParaIncluir) + " .");
+				System.setOut(arquivo);
+				System.out.println("Estamos adicionando manualmente o sorteio de numero " + numSorteio
+						+ " com as seguintes dezenas: " + Arrays.toString(sorteioParaIncluir) + " .");
+			}
+		}
+		if (verificaData) {
+			System.setOut(console);
+			System.out.println("Processamento com base no sorteio número " + numSorteio + " "
+					+ Arrays.toString(listaOrdemSorteio.get(listaOrdemSorteio.size() - 1)) + " de " + dataSorteio);
+			System.setOut(arquivo);
+			if (soVerificaData) {
+				return;
+			}
+		}
+		/*
+		 * defaultFormat = NumberFormat.getCurrencyInstance(); final
+		 * DecimalFormatSymbols decimalFormatSymbols = ((DecimalFormat)
+		 * defaultFormat).getDecimalFormatSymbols();
+		 * decimalFormatSymbols.setCurrencySymbol(""); ((DecimalFormat)
+		 * defaultFormat).setDecimalFormatSymbols(decimalFormatSymbols);
+		 */
+		LocalDate ld = LocalDate.of(Integer.parseInt(dataSorteio.substring(6, 10)),
+				Integer.parseInt(dataSorteio.substring(3, 5)), Integer.parseInt(dataSorteio.substring(0, 2)));
+		ld = ld.plusDays(1);
+		String nomeMegaSemana = "";
+		if (isMegaSemana(ld)) {
+			nomeMegaSemana = qualMegaSemana(ld);
+			/// while (ld.getDayOfWeek() != DayOfWeek.TUESDAY & ld.getDayOfWeek() !=
+			/// DayOfWeek.THURSDAY
+			/// & ld.getDayOfWeek() != DayOfWeek.SATURDAY) {
+			/// ld = ld.plusDays(1);
+		}
+		/// } else {
+		/// while (ld.getDayOfWeek() != DayOfWeek.WEDNESDAY & ld.getDayOfWeek() !=
+		/// DayOfWeek.SATURDAY) {
+		/// ld = ld.plusDays(1);
+		/// }
+		/// }
+		/*
+		 * final DateTimeFormatter formatter =
+		 * DateTimeFormatter.ofPattern("dd/MM/yyyy"); final String formattedString =
+		 * ld.format(formatter); final LocalDate hoje = LocalDate.now(); final long dias
+		 * = ld.until(hoje, ChronoUnit.DAYS);
+		 * 
+		 * if (dias > 7) {
+		 * System.out.println("\n*******************  URGENTE ARQUIVO ZIP TEM " + dias +
+		 * " DIAS. VERIFICAR SE NAO ESTA ERRADO NA FONTE (CAIXA) ************************"
+		 * ); }
+		 */
+		final DecimalFormat df = new DecimalFormat("###,###,###,###,###.00");
+		System.out.println(
+				"=======================================================================================================");
+		System.out.println("\nProcessamento com base no sorteio número " + numSorteio + " de " + dataSorteio);
+		if (sorteioParaIncluir[0] == 0) {
+			System.out.println("Neste sorteio " + (qtdGandoresSena == 0 ? "não " : "") + "houve "
+					+ (qtdGandoresSena != 0 ? qtdGandoresSena : "") + "ganhador" + (qtdGandoresSena > 1 ? "es " : "")
+					+ " da sena.");
+			if (qtdGandoresSena != 0) {
+				System.out.println(
+						"O rateio da sena foi de " + String.format("%1$12s", df.format(rateioSena)).replace(" ", ""));
+			}
+			System.out.println(
+					"O rateio da quina foi de " + String.format("%1$12s", df.format(rateioQuina)).replace(" ", ""));
+			System.out.println(
+					"O rateio da quadra foi de " + String.format("%1$12s", df.format(rateioQuadra)).replace(" ", ""));
+			if (qtdGandoresSena == 0) {
+				System.out.println("O valor acumulado é de " + df.format(valorAcumulado));
+			}
+			System.out.println("A estimativa de prêmio para o próximo sorteio é de " + df.format(estimativaPremio));
+		} else {
+			System.out.println("Sem estimativas dos rateios do ultimo sorteio incluido manualmente.");
+		}
+		if (numSorteio % 10 == 4 | numSorteio % 10 == 9) {
+			System.out.println("O próximo sorteio, o de número " + (numSorteio + 1) + ", ocorrerá em :"
+					+ dataProximoSorteio + " as 20:00, vai ratear o valor acumulado nos últimos 4 sorteios.");
+		} else {
+			System.out.println("O próximo sorteio, o de número " + (numSorteio + 1) + ", ocorrerá em :"
+					+ dataProximoSorteio + " as 20:00");
+		}
+		if (!nomeMegaSemana.isEmpty()) {
+			System.out.println("\n* * *  *    *   Mega-semana " + nomeMegaSemana
+					+ " com sorteios na terça-feira, quinta-feira e no Sábado. * * *  *    *\n");
+		}
+		System.out.println("\nApostas eletrônicas via site da caixa até as 19:00 do dia do sorteio.");
+		System.out.println(
+				"\n=======================================================================================================");
+		final File file = new File(nomeRankCalibragemCarga);
+		System.setOut(console);
+		if (file.exists()) {
+			carregaRankCalibragem(nomeRankCalibragemCarga);
+			if (listaOrdemSorteio.size() > 0) {
+				calibragemParalelaDosFatores();
+			} else {
+				if (verificaData) {
+					// System.setOut(console);
+					System.out.println("Sem sorteio para novo cálculo das fórmulas.");
+					semNovoCalculo = true;
+					// System.setOut(arquivo);
+				}
+			}
+		} else {
+			geraZerezima();
+			calibragemParalelaDosFatores();
+		}
+		if (!saidaSolicitada) {
+			System.out.print("\n                 *********************   Determina indices atuais    ****************");
+			System.setOut(arquivo);
+			System.out.println("\nNo sorteio anterior (" + numSorteio + ") foram computadas : "
+					+ String.format("%,d senas, ", resultados[0]) + String.format("%,d quinas e ", resultados[1])
+					+ String.format("%,d quadras.\n", resultados[2]));
+			// colecao.print();
+			relatorioApostas(numSorteio + 1, arquivo, console, semNovoCalculo);
+		}
+		System.setOut(arquivo);
+		final SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		formatoData.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+		final Calendar data = Calendar.getInstance();
+		System.out.println("");
+		System.out.println(
+				"\n\rProcessamento encerrado, " + "em " + formatoData.format(data.getTime()) + " com duração de "
+						+ getHMS(tInicialDoPrograma) + "." + "\n\rVerifique resultados no arquivo :" + nomeTxtFile);
+		arquivo.close();
+		// nomeTxtFile = getSequencia("F:\\WrkPlc\\Relatorios", "Lixo_v_" + ver + "-");
+		//// ////System.setOut(new PrintStream(new
+		//// FileOutputStream(FileDescriptor.out)));
+		System.setOut(console);
+		System.out.println(
+				"\r\nProcessamento encerrado, " + "em " + formatoData.format(data.getTime()) + " com duração de "
+						+ getHMS(tInicialDoPrograma) + "." + "\r\nVerifique resultados no arquivo :" + nomeTxtFile);
+		// nomeTxtFile = getSequencia("F:\\WrkPlc\\Relatorios", "Lixo_v_" + ver + "-");
+		if (sorteioParaAguardar > 0 & sorteioParaIncluir[0] > 0) {
+			waitSorteio(sorteioParaAguardar);
+		}
+		console.close();
+	}
+
+	// Recebe uma matriz com n elementos e a definição da quantidade de itens
+	// classificados na resposta.
+	// Retorna um matriz indice dos maiores elementos. Exemplo retorno[3]=11 ==> O
+	// terceiro maior numero é o contido no original[11]
+	public static int[] maiores(final int[] original, int qtd) {
+		if (qtd > original.length) {
+			qtd = original.length;
+		}
+		final int[] myOriginal = original.clone();
+		final int[] numeros = new int[qtd];
+		int maior = -1;
+		int indiceMaior = 0;
+		for (int i = 0; i < qtd; i++) {
+			maior = -1;
+			indiceMaior = 0;
+			for (int j = 0; j < myOriginal.length; j++) {
+				if (myOriginal[j] > maior) {
+					maior = myOriginal[j];
+					indiceMaior = j;
+				}
+			}
+			numeros[i] = indiceMaior;
+			myOriginal[indiceMaior] = -1;
+		}
+		return numeros;
+	}
+
+	public static int numFormulas(final int tipo, final int peso, final int quantidade) {
+		return (int) (Math.pow(tipo * (peso - 1) + 1, quantidade) - 1);
+	}
+
+	private static String openAposta(final long aposta) {
+		String retorno = "";
+		for (byte n = 1; n < 61; n++) {
+			if ((aposta & baseHash[n]) == baseHash[n]) {
+				retorno += String.format("%02d ", n);
+			}
+		}
+		return retorno;
+	}
+
+	private static byte[] openApostaNum(final long aposta) {
+		final byte[] retorno = new byte[10];
+		byte contador = 0;
+		for (byte n = 1; n < 61; n++) {
+			if ((aposta & baseHash[n]) == baseHash[n]) {
+				retorno[contador++] = n;
+				if (contador == 10) {
+					break;
+				}
+			}
+		}
+		return retorno;
+	}
+
+	private static short pontos(final byte[] sorteioAtual, final AbstractIndice abstractIndice, final byte subNumber,
+			final TipoIndice tipo) {
+		int pontos = 0;
+		for (byte testSorteio = 0; testSorteio < 6; testSorteio++) {
+			for (byte testIndice = 1; testIndice <= 10; testIndice++) {
+				if (sorteioAtual[testSorteio] == abstractIndice.getDezenaDoRank(testIndice, tipo, subNumber)) {
+					pontos++;
+				}
+			}
+		}
+		/*
+		 * if (pontos >= 6) { String teste = ""; for (byte testIndice = 1; testIndice <=
+		 * 10; testIndice++) { teste += abstractIndice.getDezenaDoRank(testIndice, tipo,
+		 * subNumber) + " "; } System.out.println( "Total de " + pontos +
+		 * " acertos. Sorteio: " + Arrays.toString(sorteioAtual) + " ==> " + teste);
+		 * System.out.println("Mega sena !!!"); }
+		 */
+		return (short) (Math.pow(3, pontos) - 1);
+	}
+
+	private static void printResumo() {
+		byte[] jogo;
+		byte[] dezenas;
+		System.out.println("");
+		System.out.println(" Jg Formula       Dezenas       Qtd Valor acumulado");
+		System.out.println("=== =======   ================= === ===============");
+		for (int conta = 0; conta < listaJogos.size(); conta++) {
+			jogo = listaJogos.get(conta);
+			dezenas = new byte[] { jogo[1], jogo[2], jogo[3], jogo[4], jogo[5], jogo[6] };
+			// Arrays.sort(dezenas);
+			System.out.println(String.format("%3d", (conta + 1)) + "-" + String.format("%7d", jogo[0]) + "   "
+					+ String.format("%02d", dezenas[0]) + " " + String.format("%02d", dezenas[1]) + " "
+					+ String.format("%02d", dezenas[2]) + " " + String.format("%02d", dezenas[3]) + " "
+					+ String.format("%02d", dezenas[4]) + " " + String.format("%02d", dezenas[5]) + " "
+					+ String.format("%03d", jogo[7]) + String.format("%16.2f ", ((conta + 1) * precoAposta)));
+		}
+	}
+
+	private static void processa(final byte[] aposta, final byte numJogo) {
+		for (int x = 4; x < 9; x++) {
+			for (int y = x + 1; y < 10; y++) {
+				adicionaJogo(aposta[0], aposta[1], aposta[2], aposta[3], aposta[x], aposta[y], numJogo);
+			}
+		}
+	}
+
+	public static String prtDezenas(final byte[] dezenas) {
+		String retorno = "";
+		for (final int dezena : dezenas) {
+			retorno += String.format(" %02d", dezena);
+		}
+		return retorno;
+	}
+
+	public static String qualMegaSemana(LocalDate data) {
+		while (data.getDayOfWeek().getValue() < 2 | data.getDayOfWeek().getValue() > 5) {
+			data = data.plusDays(1);
+		}
+		;
+		final LocalDate[] megaSemanas = setMegaSemana();// new LocalDate[8];
+		// Registrar a terca feira da semana
+		final String[] megaSemanaNome = new String[8];
+		megaSemanaNome[0] = "Verão";
+		megaSemanaNome[1] = "Pascoa";// "Carnaval";
+		megaSemanaNome[2] = "Mães";
+		megaSemanaNome[3] = "Férias";
+		megaSemanaNome[4] = "Pais";
+		megaSemanaNome[5] = "Primavera";
+		megaSemanaNome[6] = "Sorte";
+		megaSemanaNome[7] = "Natal";
+		LocalDate dataFinal;
+		for (int i = 0; i < 8; i++) {
+			dataFinal = megaSemanas[i].plusDays(4);
+			if ((data.isEqual(megaSemanas[i]) | data.isAfter(megaSemanas[i]))
+					& (data.isEqual(dataFinal) | data.isBefore(dataFinal))) {
+				return megaSemanaNome[i];
+			}
+		}
+		return "";
+	}
+
+	public static List<byte[]> readAPI(final boolean verificaData, final PrintStream console, final PrintStream arquivo)
+			throws Exception {
+		final List<byte[]> numSorteados = new ArrayList<>();
+		final byte anExample[] = new byte[6];
+		// final JsonNode objNode = null;
+		try {
+			/////////
+			final String nomeTXT = "F:\\WrkPlc\\rede\\SorteiosV4.txt";
+			final String baseUrl = "https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena";
+			final int concursoFinal = getConcurso(baseUrl);
+			final int qtdLinhasNoTxt = contarLinhas(nomeTXT);
+			String linha;
+			String url;
+			JSONObject jsonResponse;
+			JSONArray dezenasSorteadas;
+			JSONArray listaRateioPremio;
+			if (qtdLinhasNoTxt > 0) {
+				final File arquivoTXT = new File(nomeTXT);
+				String[] partes;
+				try (BufferedReader leitor = new BufferedReader(new FileReader(arquivoTXT))) {
+					for (int n = 1; n <= qtdLinhasNoTxt; n++) {
+						linha = leitor.readLine();
+						partes = linha.split(",");
+						for (int k = 0; k < 6; k++) {
+							anExample[k] = Byte.parseByte(partes[k].trim());
+						}
+						numSorteados.add(anExample.clone());
+					}
+				}
+			}
+			if (qtdLinhasNoTxt < concursoFinal) {
+				for (int n = (qtdLinhasNoTxt + 1); n <= concursoFinal; n++) {
+					url = baseUrl + "/" + n;
+					jsonResponse = getJsonFromUrl(url);
+					dezenasSorteadas = jsonResponse.getJSONArray("dezenasSorteadasOrdemSorteio");
+					// listaRateioPremio = jsonResponse.getJSONArray("listaRateioPremio");
+					for (int i = 0; i < 6; i++) {
+						anExample[i] = Byte.parseByte(dezenasSorteadas.getString(i).trim());
+					}
+					numSorteados.add(anExample.clone());
+				}
+			}
+			jsonResponse = getJsonFromUrl(baseUrl);
+			/*
+			 * rateioSena = objNode.path("premiacoes").get(0).get("valorPremio").asDouble();
+			 * rateioQuina =
+			 * objNode.path("premiacoes").get(1).get("valorPremio").asDouble(); rateioQuadra
+			 * = objNode.path("premiacoes").get(2).get("valorPremio").asDouble();
+			 * dataSorteio = objNode.path("data").asText(); dataProximoSorteio =
+			 * objNode.path("dataProximoConcurso").asText(); qtdGandoresSena =
+			 * objNode.path("premiacoes").get(0).get("ganhadores").asInt(); numSorteio =
+			 * objNode.path("concurso").shortValue(); valorAcumulado =
+			 * objNode.path("valorAcumuladoConcurso_0_5").asDouble(); estimativaPremio =
+			 * objNode.path("valorEstimadoProximoConcurso").asDouble();
+			 */
+			// Obtém os campos solicitados
+			listaRateioPremio = jsonResponse.getJSONArray("listaRateioPremio");
+			rateioSena = listaRateioPremio.getJSONObject(0).getDouble("valorPremio");
+			qtdGandoresSena = listaRateioPremio.getJSONObject(0).getInt("numeroDeGanhadores");
+			rateioQuina = listaRateioPremio.getJSONObject(1).getDouble("valorPremio");
+			rateioQuadra = listaRateioPremio.getJSONObject(2).getDouble("valorPremio");
+			dataSorteio = jsonResponse.getString("dataApuracao");
+			dataProximoSorteio = jsonResponse.getString("dataProximoConcurso");
+			numSorteio = (short) jsonResponse.getInt("numero");
+			valorAcumulado = jsonResponse.getDouble("valorAcumuladoProximoConcurso");
+			estimativaPremio = jsonResponse.getDouble("valorEstimadoProximoConcurso");
+			return numSorteados;
+		} catch (final IOException e) {
+			e.printStackTrace();
+			return numSorteados; // Retorna -1 em caso de erro na leitura do arquivo
+		}
+	}
+
+	///////////
+	// String url = "https://loteriascaixa-api.herokuapp.com/api/megasena";
+	/*
+	 * String url =
+	 * "https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena"; // Criando
+	 * a requisição HTTP HttpRequest request =
+	 * HttpRequest.newBuilder().uri(URI.create(url)).GET().build(); // Enviando a
+	 * requisição e obtendo a resposta HttpResponse<String> response =
+	 * HttpClient.newHttpClient().send(request,
+	 * HttpResponse.BodyHandlers.ofString()); // Processando o JSON String
+	 * jsonResponse = response.body(); ObjectMapper mapper = new ObjectMapper();
+	 * final JsonNode rootNode = mapper.readTree(jsonResponse); for (int i =
+	 * (rootNode.size() - 1); i >= 0; i--) { objNode = rootNode.get(i); //final int
+	 * sorteio = objNode.path("concurso").asInt(); final JsonNode numerosNode =
+	 * objNode.path("dezenasOrdemSorteio"); //final String data =
+	 * objNode.path("data").asText(); //final String dataProximo =
+	 * objNode.path("dataProximoConcurso").asText(); //final JsonNode tsts =
+	 * objNode.path("premiacoes"); //final JsonNode tsts2 = tsts.get(0); //final
+	 * JsonNode tsts3 = tsts2.get("ganhadores"); //final int ganhadores =
+	 * objNode.path("premiacoes").get(0).get("valorPremio").asInt(); int contador =
+	 * 0; for (final JsonNode numeroNode : numerosNode) { anExample[contador++] =
+	 * (byte) numeroNode.asInt(); } numSorteados.add(anExample.clone()); } if
+	 * (rootNode.get(0).path("concurso").shortValue() == lastSorteio()) { objNode =
+	 * rootNode.get(0); } else if ((rootNode.get(0).path("concurso").shortValue() +
+	 * 1) == lastSorteio()) { // URL correta da API url =
+	 * "https://loteriascaixa-api.herokuapp.com/api/megasena/latest"; // Criando a
+	 * requisição HTTP request =
+	 * HttpRequest.newBuilder().uri(URI.create(url)).GET().build(); // Enviando a
+	 * requisição e obtendo a resposta response =
+	 * HttpClient.newHttpClient().send(request,
+	 * HttpResponse.BodyHandlers.ofString()); // Processando o JSON jsonResponse =
+	 * response.body(); mapper = new ObjectMapper(); ///rootNode =
+	 * mapper.readTree(jsonResponse); objNode = mapper.readTree(jsonResponse); final
+	 * JsonNode numerosNode = objNode.path("dezenasOrdemSorteio"); //final String
+	 * data = objNode.path("data").asText(); //final String dataProximo =
+	 * objNode.path("dataProximoConcurso").asText(); //final JsonNode tsts =
+	 * objNode.path("premiacoes"); //final JsonNode tsts2 = tsts.get(0); //final
+	 * JsonNode tsts3 = tsts2.get("ganhadores"); //final int ganhadores =
+	 * objNode.path("premiacoes").get(0).get("valorPremio").asInt(); int contador =
+	 * 0; for (final JsonNode numeroNode : numerosNode) { anExample[contador++] =
+	 * (byte) numeroNode.asInt(); } numSorteados.add(anExample.clone()); }
+	 * rateioSena = objNode.path("premiacoes").get(0).get("valorPremio").asDouble();
+	 * rateioQuina =
+	 * objNode.path("premiacoes").get(1).get("valorPremio").asDouble(); rateioQuadra
+	 * = objNode.path("premiacoes").get(2).get("valorPremio").asDouble();
+	 * dataSorteio = objNode.path("data").asText(); dataProximoSorteio =
+	 * objNode.path("dataProximoConcurso").asText(); qtdGandoresSena =
+	 * objNode.path("premiacoes").get(0).get("ganhadores").asInt(); numSorteio =
+	 * objNode.path("concurso").shortValue(); valorAcumulado =
+	 * objNode.path("valorAcumuladoConcurso_0_5").asDouble(); estimativaPremio =
+	 * objNode.path("valorEstimadoProximoConcurso").asDouble(); return numSorteados;
+	 * } catch (IOException | InterruptedException e) { e.printStackTrace(); }
+	 * 
+	 * return null; }
+	 */
+	public static List<byte[]> readFileTXT(final boolean verificaData, final PrintStream console,
+			final PrintStream arquivo) {
+		final SimpleDateFormat format = new SimpleDateFormat();
+		format.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+		final String nomereadFileTXT = "F:\\WrkPlc\\rede\\SorteiosV4.txt";
+		System.out.println("Inicio da carga do arquivo " + nomereadFileTXT + " "
+				+ format.format(GregorianCalendar.getInstance().getTime()));
+		// long qtdRegistros = 0L;
+		// final long limite = (qtdItens / 10); //13_999_999; 10% do total
+		BufferedReader br = null;
+		final List<byte[]> numSorteados = new ArrayList<>();
+		final byte anExample[] = new byte[6];
+		try {
+			br = Files.newBufferedReader(Paths.get(nomereadFileTXT), StandardCharsets.UTF_8);
+			String line = null;
+			// int ultimoSorteio = 0;
+			// int ultimoSorteio=2000;
+			// int percente = 0;
+			while ((line = br.readLine()) != null) {
+				// if ((++qtdRegistros % limite) == 0L) {
+				// percente += 10;
+				// System.out.println(
+				// "Carregados até o momento ( " +
+				// format.format(GregorianCalendar.getInstance().getTime())
+				// + " ) aproximadamente " + percente + "% dos registros.");
+				// }
+				// if (line.substring(0, 1).equals("#")) {
+				// ultimoSorteio = Integer.parseInt(line.substring(1).replaceAll(" ", ""));
+				// } else {
+				// line = line.trim().replaceAll("\\s{2,}", " ");
+				line = line.replaceAll("\t", ",");
+				line = line.replaceAll(" ", ",");
+				line = line.replaceAll(",,", ",");
+				line = line.replaceAll(",,", ",");
+				final String[] values = line.split(",");
+				//////////////////////////////////////////
+				// final Calibragem item = new Calibragem();
+				// item.senas = Short.parseShort(values[0]);
+				// item.quinas = Short.parseShort(values[1]);
+				// item.quadras = Short.parseShort(values[2]);
+				// item.senasRel = Short.parseShort(values[3]);
+				// item.quinasRel = Short.parseShort(values[4]);
+				// item.quadrasRel = Short.parseShort(values[5]);
+				// item.qtdDezenas = Short.parseShort(values[6]);
+				// item.sorteio = Short.parseShort(values[7]);
+				// item.baseFormula = Long.parseLong(values[8]);
+				// item.numSorteiosComAcerto = Short.parseShort(values[9]);
+				//////////////////////////////////////////
+				// rankCalibragemFinal.add(item);
+				for (int k = 0; k < 6; k++) {
+					anExample[k] = Byte.parseByte(values[k]);
+				}
+				numSorteados.add(anExample.clone());
+				// }
+			}
+			if (br != null) {
+				br.close();
+			}
+			System.out.println("Final da carga do arquivo " + nomereadFileTXT + " "
+					+ format.format(GregorianCalendar.getInstance().getTime()));
+			// if (!continuidade | nomeRankCalibragem.equals("Continuidade.txt")) {
+			// if (listaOrdemSorteio.size() < ultimoSorteio) {
+			// System.out.println(
+			// " ****************** URGENTE ARQUIVO de memoria do Rank mais atual que o
+			// arquivo com dados dos Sorteios **************");
+			// } else {
+			// System.out.println("Calculo dos fatores dos " + ultimoSorteio + " sorteios
+			// carregados." + " "
+			// + format.format(GregorianCalendar.getInstance().getTime()));
+			// int contadorSorteio = 1;
+			// final Sorteio sorteio = new Sorteio();
+			// percente = 0;
+			// final int fracao = (ultimoSorteio > 10 ? ultimoSorteio / 10 : 1);
+			// while (contadorSorteio <= ultimoSorteio) {
+			// if (listaOrdemSorteio.size() == 1) {
+			// apuraResultado();
+			// }
+			// if ((contadorSorteio % fracao == 0)) {
+			// percente += 10;
+			// System.out.println("Calculado até o momento ( "
+			// + format.format(GregorianCalendar.getInstance().getTime())
+			// + " ) aproximadamente " + percente + "% dos registros.");
+			// }
+			// sorteio.reg(listaOrdemSorteio.get(0));
+			// colecao.add(sorteio);
+			// listaOrdemSorteio.remove(0);
+			// contadorSorteio++;
+			// }
+			// System.out.println("Final do calculo dos fatores dos sorteios carregados." +
+			// " "
+			// + format.format(GregorianCalendar.getInstance().getTime()));
+			// }
+			// }
+		} catch (final FileNotFoundException ex) {
+			ex.printStackTrace();
+		} catch (final IOException ex) {
+			ex.printStackTrace();
+		}
+		numSorteio = (short) (numSorteados.size());
+		dataSorteio = "01/01/2021";
+		return numSorteados;
+	}
+
+	private static void relatorioApostas(final int sorteioProposto, final PrintStream arquivo,
+			final PrintStream console, final boolean semNovoCalculo) throws InterruptedException, ExecutionException {
+		// final byte[][] indice = { { 0, 0, 1 }, { 0, 1, 0 }, { 0, 1, 1 }, { 1, 0, 0 },
+		// { 1, 0, 1 }, { 1, 1, 0 },
+		// { 0, 0, 2 }, { 0, 2, 0 }, { 0, 2, 2 }, { 2, 0, 0 }, { 2, 0, 2 }, { 2, 2, 0 }
+		// };
+		final DecimalFormat df = new DecimalFormat("###,###,###,###,###.00");
+		if (rankCalibragemFinal.size() == 0) {
+			System.out.println(
+					"\n ************************  Não encontrado registro nas condicoes estabelecidas.  ************************  ");
+			return;
+		} else {
+			final SimpleDateFormat format = new SimpleDateFormat();
+			format.setTimeZone(TimeZone.getTimeZone("GMT-3:00"));
+			System.setOut(console);
+			// bestNumbers(indice);
+			long t1 = System.currentTimeMillis();
+			System.out.println("\nCalculando a aposta mais bem classificada para este sorteio.");
+			// for (byte contador = 1; contador < 61; contador++) {
+			// baseHash[contador] = (1L << (contador - 1));
+			// }
+			System.setOut(arquivo);
+			
+			// final int maiorQtdDezenas = 10;
+			// for (int k = 1; k < (maiorQtdDezenas * 3); k++) {
+			// temp += "=";
+			// temp2 += " ";
+			// }
+			int qtd = 24;
+			// byte[] teste = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+			// long testeHash = geraHash(teste);
+			// String testeRetorno = openAposta(testeHash);
+			// teste = new byte[] { 1, 40, 3, 4, 5, 6, 30, 8, 9, 60 };
+			// testeHash = geraHash(teste);
+			// testeRetorno = openAposta(testeHash);
+			// testeHash = 0;
+			//// ---- Impressão do cabeçalho
+			System.out.println("\n" + "*".repeat(103));
+			System.out.println("           ******** Calculo das dezenas apontadas para apostas o sorteio  "
+					+ sorteioProposto + " **********");
+			System.out.println("*".repeat(103) + "\n");
+			// bestNumbers(indice, arquivo, console, semNovoCalculo);
+			bestNumbers(arquivo, console, semNovoCalculo);
+			System.out.println("\n" + "*".repeat(103));
+			// System.out.println(" Lista dos até "+qtd+" melhores avaliados
+			// ("+qtdPorNumDezenas+") por numero de dezenas. ");
+			System.out.println("                  Lista dos até " + qtd + " melhores avaliados.  ");
+			System.out.println("\n" + "*".repeat(103));
+			// System.out.println(bestNumber);
+			System.out.println("\n" + "*".repeat(103));
+			// final String bestNumber = bestNumbers(indice);
+			//System.setOut(console);
+			//System.out.println("\n" + format.format(GregorianCalendar.getInstance().getTime())
+			//		+ " Classificando a base de dados ordem 1.");
+			t1 = System.currentTimeMillis();
+			//Calibragem.ordem = 1;
+			//Collections.sort(rankCalibragemFinal);
+			//System.out.println("Final da Classificando a base de dados ordem 1. Executado em : " + getHMS(t1));
+			//System.setOut(arquivo);
+			int[] dezenasMaisApontadas;
+			int[] dezenasMaisApontadasGeral;
+			dezenasMaisApontadasGeral = new int[60];
+			Arrays.fill(dezenasMaisApontadasGeral, 0);
+			Calibragem.setQtdSorteios(numSorteio);
+			Calibragem.calcularProbabilidadesTeoricas();
+			List<Calibragem> rCFPrint = new ArrayList<>();
+			List<Calibragem> rankCalibragemPrint = Collections.synchronizedList(rCFPrint);
+			for (int tipo = 1; tipo < 5; tipo++) {
+				// listaApostas.clear();
+				listaJogos.clear();
+				indiceApostas.clear();
+				// if (tipo == 6) {
+				// System.out.println("\n******* Resultados com acertos SENA **********");
+				// }
+				dezenasMaisApontadas = new int[60];
+				Arrays.fill(dezenasMaisApontadas, 0);
+				rankCalibragemPrint = getItensToPrint(rankCalibragemFinal,tipo,qtd , numSorteio ,arquivo,console);
+				if (tipo == 1) {
+					System.out.println("");
+					System.out.println(
+							"\n\n*******    Resultados classificados por ordem de acertos em qtd Dezenas =>SENA=> QUINA => Quadra e num Acertos *****");
+				}
+				if (tipo == 2) {
+					System.out.println(
+							"\n\n*******    Resultados classificados por ordem de acertos em num Acertos => qtd Dezenas =>SENA=> QUINA e Quadra  *****");
+				}
+				if (tipo == 3) {
+					System.out.println(
+							"\n\n*******    Resultados classificados por ordem de acertos em num Sorteio ==> Acertos => qtd Dezenas =>SENA=> QUINA e Quadra  *****");
+				}
+				if (tipo == 4) {
+					System.out.println("\n\n*******    Resultados classificados por ordem do Score  *****");
+				}
+				prtCabecalho();
+				int cursorMaiores = 0;
+				int contador = 0;
+				Formula formulaLocal;
+				byte[][] dezenasLocalBase = new byte[2][10];
+				byte[] dezenasLocal = new byte[10];
+				double obtido;
+				double ScoreItem;
+				while (cursorMaiores < qtd & cursorMaiores < rankCalibragemPrint.size()) {
+					item = rankCalibragemPrint.get(contador++);
+					formulaLocal = new Formula(item.baseFormula);
+					dezenasLocalBase = SoProcessa.defineDezenasUltra(formulaLocal, colecao);// , indice);
+					if (dezenasLocalBase == null) {
+						Arrays.fill(dezenasLocal, (byte) 0);
+					}
+					dezenasLocal = dezenasLocalBase[(formulaLocal.filtro ? 0 : 1)];
+					for (final int dezenas : dezenasLocal) {
+						dezenasMaisApontadas[dezenas - 1]++;
+					}
+					final int combinacoes = comb(10, 6);
+					obtido = item.quadras * rateioQuadra + item.quinas * rateioQuina + item.senas * rateioSena;
+					System.out.println("");
+					System.out.print(String.format("%4d-", (cursorMaiores + 1)));
+					System.out.print(String.format("%1$14s", df.format(obtido / item.numSorteiosComAcerto())));
+					System.out.print(String.format("%1$13s", df.format(((combinacoes * precoAposta)))));
+					System.out.print(String.format("%1$15s",
+							df.format((obtido / item.numSorteiosComAcerto()) - (1 * (combinacoes * precoAposta)))));
+					System.out.print(String.format(" %5d %6d %7d", item.senas, item.quinas, item.quadras));
+					System.out.print(String.format(" %5d %6d %7d", item.ternos, item.duplas, item.solos));
+					System.out.print((formulaLocal.filtro ? "  sim  " : "  não  "));
+					System.out.print(String.format(" %6d ", item.ultimoSorteioComAcerto));
+					System.out.print(String.format(" %5d ", item.numSorteiosComAcerto()));
+					ScoreItem = item.ordem4();
+					System.out.print(String.format("%5.2f", ScoreItem));
+					System.out.print(" " + determinarClassificacao(ScoreItem) + " ");
+					System.out.print(String.format("%1$" + ((10 * 3)-2) + "s ", prtDezenas(dezenasLocal)));
+
+					
+					System.out.print(
+							"" + String.format("%1$14s", formulaLocal.base) + " => " + formulaLocal.toString());
+					processa(dezenasLocal, (byte) ((cursorMaiores + 1)));
+					cursorMaiores++;
+				}
+				for (int nEscolhidas = 0; nEscolhidas < 60; nEscolhidas++) {
+					dezenasMaisApontadasGeral[nEscolhidas] += dezenasMaisApontadas[nEscolhidas];
+				}
+				final int[] maisEscolhidasOrdem = maiores(dezenasMaisApontadas, 10);
+				System.out.println("");
+				System.out.print("\n\nRelacao das 10 dezenas mais apontadas nos resultados acima :");
+				for (int nEscolhidas = 0; nEscolhidas < 10; nEscolhidas++) {
+					System.out.print(" " + (maisEscolhidasOrdem[nEscolhidas] + 1));
+				}
+				System.out.println("");
+				printResumo();
+			}
+			final int[] maisEscolhidasOrdem = maiores(dezenasMaisApontadasGeral, 10);
+			System.out.println("");
+			System.out.print("\n\nRelacao GERAL das 10 dezenas mais apontadas em todos os resultados acima :");
+			for (int nEscolhidas = 0; nEscolhidas < 10; nEscolhidas++) {
+				System.out.print(" " + (maisEscolhidasOrdem[nEscolhidas] + 1));
+			}
+			System.out.println("");
+		}
+	}
+
+	private static List<Calibragem> getItensToPrint(List<Calibragem> rankCalibragemFinal, int tipo, int qtd, short numSorteio2, PrintStream arquivo, PrintStream console) {
+		List<Calibragem> rCFgetItens = new ArrayList<>();
+		List<Calibragem> rankCalibragemTemp = Collections.synchronizedList(rCFgetItens);
+		final SimpleDateFormat format = new SimpleDateFormat();
+		String	nomeRankCalPrint = "RankCalPrint" + ver + "-"+tipo+"-"+numSorteio+".txt";
+		final File file = new File(nomeRankCalPrint);
+		System.setOut(console);
+		if (file.exists()) {
+			carregaRankCalPrint(nomeRankCalPrint,rankCalibragemTemp, qtd);
+		}	else	{
+			long t1 = System.currentTimeMillis();
+			System.out.println("\n" + format.format(GregorianCalendar.getInstance().getTime())
+					+ " Classificando a base de dados ordem "+tipo);
+			
+			Calibragem.ordem = (byte) tipo;
+			
+			//Collections.sort(rankCalibragemFinal);
+			//CalibragemSorter.sortWithProgress(rankCalibragemFinal);
+			//MassSorter.sortWithProgress(rankCalibragemFinal);
+			rankCalibragemTemp=TopNElements.getTopN(rankCalibragemFinal, qtd);
+			System.out.println("Final da Classificando a base de dados ordem "+tipo+". Executado em : " + getHMS(t1));
+			
+			gravaRankCalPrint(nomeRankCalPrint, rankCalibragemTemp,qtd);
+		}
+		System.setOut(arquivo);
+		return rankCalibragemTemp;
+	}
+
+	private static void salvaBestNumber(final List<apostaAcerto> apostasListSave) {
+		final int total = apostasListSave.get(0).totRegGet();
+		try {
+			final FileOutputStream f = new FileOutputStream(new File("myObjects.txt"));
+			final ObjectOutputStream o = new ObjectOutputStream(f);
+			// Write objects to file
+			o.writeObject(apostasListSave);
+			o.writeObject(total);
+			o.close();
+			f.close();
+		} catch (final FileNotFoundException e) {
+			System.out.println("File not found");
+		} catch (final IOException e) {
+			System.out.println("Error initializing stream");
+		}
+	}
+
+	public static LocalDate[] setMegaSemana() {
+		// Mães 04 terça, 06 quinta e 08 sabado de mai. 2368, 2369 e 2370
+		final LocalDate[] megaSemanas = new LocalDate[8];
+		// Registrar a terca feira da semana
+		megaSemanas[0] = LocalDate.of(2025, 02, 4);
+		megaSemanas[1] = LocalDate.of(2025, 2, 11);
+		megaSemanas[2] = LocalDate.of(2025, 2, 18);
+		megaSemanas[3] = LocalDate.of(2025, 6, 29);
+		megaSemanas[4] = LocalDate.of(2025, 8, 10);
+		megaSemanas[5] = LocalDate.of(2025, 10, 29);
+		megaSemanas[6] = LocalDate.of(2025, 10, 19);
+		megaSemanas[7] = LocalDate.of(2025, 12, 7);
+		return megaSemanas;
+	}
+
+	private static String sorteiotoString(final byte[] is) {
+		final String retorno = "["
+				+ String.format("%02d %02d %02d %02d %02d %02d", is[0], is[1], is[2], is[3], is[4], is[5]) + "]";
+		return retorno;
+	}
+
+	private static byte[][] testaFormulas(final List<byte[]> listaOrdemSorteio2, final Colecao colecao2) {
+		/*
+		 * O metodo retorna uma tabela contendo a ordem decrescente do numero de acertos
+		 * de cada indice dentro dos tipos Topo, Centro e Base Pontos ordem
+		 * ====================== ====================== Indice Nome Sorteio Topo Centro
+		 * Base Formula 1st 2nd 3rd ======
+		 * ======================================================================
+		 * ======= ====== ======= ======= ======== ====== ======= ======= 1-0 indices
+		 * das dezenas mais sorteadas 2184 9078 9646 9034 1 1 0 2 2-0 Ultimo Ciclo 2184
+		 * 9012 8802 8518 2 0 1 2 3-0 indices das dezena sem sorteio 2184 8892 9030 8316
+		 * 3 1 0 2 3-1 indices dos maiores intervalos sem sorteio 2184 8848 9680 9106 4
+		 * 1 2 0 3-2 indices dos menores intervalos (entre os intervalos maiores) sem
+		 * sorteio 2184 9378 9560 9572 5 2 1 0 4-0 indices da media dos intervalos nos
+		 * ciclos de sorteios 2184 9262 8690 9446 6 2 0 1 4-1 Indice para comparacao com
+		 * o indice ptMseq do Rank Geral 2184 9138 9104 8330 7 0 1 2 7-0 Indice de
+		 * distribuicao entre pares e impares 2184 8974 9046 9058 8 2 1 0 9-0 Indice de
+		 * registro da pegada da onda 2184 8856 9112 8680 9 1 0 2 10-0 Indice de Monte
+		 * Carlo 2184 9198 9142 8956 10 0 1 2
+		 */
+		short numeroSorteioAtual = 0;
+		byte[] sorteioAtual;
+		// long tInicial,tFinal,tGrupo,tPrevisto;
+		// Date d;
+		// NumberFormat format;
+		// int sorteiosParaProcessar;
+		short contaSorteio = 0;
+		short contaIndices;
+		AbstractIndice indice;
+		final byte numIndices = (byte) colecao.todos.size();
+		final int[][][] totais = new int[numIndices][3][3];
+		final byte[][] ordemIndices = new byte[numIndices][3];
+		/*
+		 * System.out.println(
+		 * "                                                                                                  Pontos "
+		 * ); System.out.println(
+		 * "                                                                                           ======================"
+		 * ); System.out.println(
+		 * "Indice  Nome                                                                      Sorteio  Topo    Centro    Base"
+		 * ); System.out.println(
+		 * "======  ======================================================================    =======  ====== ======= ======="
+		 * );
+		 */
+		while (contaSorteio < listaOrdemSorteio.size()) {
+			numeroSorteioAtual = (short) (contaSorteio + 1);
+			sorteioAtual = listaOrdemSorteio.get(contaSorteio);
+			// tInicial = System.currentTimeMillis();
+			// d = GregorianCalendar.getInstance().getTime();
+			// if (!estamosEmTeste) {
+			// System.out.print("Inicio da apuração da performance das formulas : " +
+			// format.format(d));
+			// }
+			// int pontos[] = new int [numFormulas];
+			contaIndices = 0;
+			byte contInterno;
+			while (contaIndices < numIndices) {
+				indice = colecao.todos.get(contaIndices);
+				contInterno = 0;
+				while ((indice.qtdSubIndices >= contInterno)) {
+					totais[contaIndices][contInterno][0] += pontos(sorteioAtual, indice, contInterno, TipoIndice.TOPO);
+					totais[contaIndices][contInterno][1] += pontos(sorteioAtual, indice, contInterno,
+							TipoIndice.CENTRO);
+					totais[contaIndices][contInterno][2] += pontos(sorteioAtual, indice, contInterno, TipoIndice.BASE);
+					/*
+					 * System.out.println(String.format("%2d-%1d  %72s     %6d  %6d  %6d  %6d ",
+					 * (contaIndices + 1), contInterno, (contInterno == 0 ? indice.nomeDados :
+					 * (contInterno == 1 ? indice.nomeSub1 : indice.nomeSub2)), numeroSorteioAtual,
+					 * totais[contaIndices][contInterno][0], totais[contaIndices][contInterno][1],
+					 * totais[contaIndices][contInterno][2]));
+					 */
+					contInterno++;
+				}
+				contaIndices++;
+			}
+			final Sorteio sorteio = new Sorteio();
+			sorteio.reg(listaOrdemSorteio.get(contaSorteio++));
+			colecao.add(sorteio);
+			// listaOrdemSorteio.remove(0);
+			colecao.numeroDoUltimoSorteio = numeroSorteioAtual;
+		}
+		// vou preparas a matrix dos melhores entre TOPO, Centro e Base ( 0, 1 ,2 )
+		/*
+		 * System.out.println(
+		 * "                                                                                                  Pontos                          ordem "
+		 * ); System.out.println(
+		 * "                                                                                           ======================          ======================"
+		 * ); System.out.println(
+		 * "Indice  Nome                                                                      Sorteio  Topo    Centro    Base  Formula   1st      2nd     3rd"
+		 * ); System.out.println(
+		 * "======  ======================================================================    =======  ====== ======= ======= ======== ====== ======= ======="
+		 * );
+		 */
+		byte contaOrdem = 0;
+		contaIndices = 0;
+		byte contInterno;
+		int a, b, c;
+		while (contaIndices < numIndices) {
+			indice = colecao.todos.get(contaIndices);
+			if (indice.indiceDeFormula == true) {
+				contInterno = 0;
+				while ((indice.qtdSubIndices >= contInterno)) {
+					a = totais[contaIndices][contInterno][0];
+					b = totais[contaIndices][contInterno][1];
+					c = totais[contaIndices][contInterno][2];
+					if (a > b) {
+						if (a > c) {
+							ordemIndices[contaOrdem][0] = 0;
+							if (b > c) {
+								ordemIndices[contaOrdem][1] = 1;
+								ordemIndices[contaOrdem][2] = 2;
+							} else {
+								ordemIndices[contaOrdem][1] = 2;
+								ordemIndices[contaOrdem][2] = 1;
+							}
+						} else {
+							ordemIndices[contaOrdem][0] = 2;
+							ordemIndices[contaOrdem][1] = 0;
+							ordemIndices[contaOrdem][2] = 1;
+						}
+					} else if (b > c) {
+						ordemIndices[contaOrdem][0] = 1;
+						if (a > c) {
+							ordemIndices[contaOrdem][1] = 0;
+							ordemIndices[contaOrdem][2] = 2;
+						} else {
+							ordemIndices[contaOrdem][1] = 2;
+							ordemIndices[contaOrdem][2] = 0;
+						}
+					} else {
+						ordemIndices[contaOrdem][0] = 2;
+						ordemIndices[contaOrdem][1] = 1;
+						ordemIndices[contaOrdem][2] = 0;
+					}
+					/*
+					 * System.out.println(String.
+					 * format("%2d-%1d  %72s     %6d  %6d  %6d  %6d   %6d %6d  %6d  %6d ",
+					 * (contaIndices + 1), contInterno, (contInterno == 0 ? indice.nomeDados :
+					 * (contInterno == 1 ? indice.nomeSub1 : indice.nomeSub2)), numeroSorteioAtual,
+					 * totais[contaIndices][contInterno][0], totais[contaIndices][contInterno][1],
+					 * totais[contaIndices][contInterno][2], (contaOrdem + 1),
+					 * ordemIndices[contaOrdem][0], ordemIndices[contaOrdem][1],
+					 * ordemIndices[contaOrdem][2]));
+					 */
+					contaOrdem++;
+					contInterno++;
+				}
+			}
+			contaIndices++;
+		}
+		return ordemIndices;
+	}
+
+	private static String textNum(final int valor) {
+		// defaultFormat = NumberFormat.getIntegerInstance();
+		final DecimalFormat df = new DecimalFormat("###,###,###,###,###.00");
+		return df.format(valor);
+	}
+
+	private static String textNumInt(final int valor) {
+		// defaultFormat = NumberFormat.getIntegerInstance();
+		final DecimalFormat df = new DecimalFormat("###,###,###,###,###");
+		final String texto = " ".repeat(10) + df.format(valor);
+		return (texto.substring(texto.length() - 11));
+	}
+	/*
+	 * public List<int[]> readFile() { BufferedReader br = null; int numNum = 0;
+	 * final List<int[]> numSorteados = new ArrayList<>(); final int anExample[] =
+	 * new int[6]; try { //// substituido pela linha abaixo///// br = new
+	 * BufferedReader(new //// FileReader("ResultadosOrdemSorteios.csv")); br =
+	 * Files.newBufferedReader(Paths.get("ResultadosOrdemSorteios.csv"),
+	 * StandardCharsets.UTF_8); String line = null; numNum = 0; while ((line =
+	 * br.readLine()) != null) { // Distribuir os valores ex. 53;46;28;48;37;12 ==>
+	 * {53,46,28,48,37,12} final String[] values = line.split(";"); // Carrego o
+	 * jogo ex . {53,46,28,48,37,12} for (final String str : values) {
+	 * anExample[numNum++] = Integer.parseInt(str); } // Adiciono o jogo na lista
+	 * dos sorteados numSorteados.add(anExample.clone()); numNum = 0; } } catch
+	 * (final FileNotFoundException ex) { ex.printStackTrace(); } catch (final
+	 * IOException ex) { ex.printStackTrace(); } finally { try { if (br != null) {
+	 * br.close(); } return numSorteados; } catch (final IOException ex) {
+	 * ex.printStackTrace(); } } return numSorteados; }
+	 */
+	/*
+	 * public List<int[]> readFileHTML() { BufferedReader br = null; int numColuna =
+	 * 1; final List<int[]> numSorteados = new ArrayList<>(); final int anExample[]
+	 * = new int[6]; try { br = Files.newBufferedReader(Paths.get("D_MEGA.HTM"),
+	 * StandardCharsets.UTF_8); String line = null; boolean prt = false; while
+	 * ((line = br.readLine()) != null) { if (line.contains("</tr>")) { if
+	 * (numColuna != 0) { numColuna = 0; prt = true; } continue; } else if
+	 * (!line.contains("<td rowspan")) { continue; } if (prt) { // 1 remove o
+	 * "</td>" e depois remove desde < ate (.*) > line = line.replaceAll("</td>",
+	 * "").replaceAll("<.*>", ""); if (numColuna > 1 & numColuna < 8) {
+	 * anExample[numColuna - 2] = Integer.parseInt(line); } else if (numColuna == 8)
+	 * { numSorteados.add(anExample.clone()); } numColuna++; } } } catch (final
+	 * FileNotFoundException ex) { ex.printStackTrace(); } catch (final IOException
+	 * ex) { ex.printStackTrace(); } finally { try { if (br != null) { br.close(); }
+	 * return numSorteados; } catch (final IOException ex) { ex.printStackTrace(); }
+	 * } return numSorteados; }
+	 */
+
+	public static void wait(final int s) {
+		try {
+			Thread.sleep(s * 1000);
+		} catch (final InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private static void waitSorteio(final int sorteioParaAguardar) throws Exception {
+		final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+		LocalDateTime now;
+		// System.setOut(console);
+		System.out.println("\nAguardando chegada do sorteio " + sorteioParaAguardar + " .");
+		int intervalo = 600;
+		Calendar agora;
+		int hora;
+		while (true) {
+			/// getSorteio();
+			/// if (sorteioParaAguardar == numSorteio) {
+			numSorteio = lastSorteio();
+			if (sorteioParaAguardar == numSorteio) {
+				break;
+			}
+			now = LocalDateTime.now();
+			// System.out.println(dtf.format(now));
+			agora = Calendar.getInstance();
+			hora = agora.get(Calendar.HOUR_OF_DAY); // Hora no formato 24h
+			if (numSorteio == 0) {
+				System.out.println(dtf.format(now) + " Erro ao acessar o serviço da Caixa.");
+				continue;
+			}
+			if (hora >= 20 && hora < 22) {
+				// System.out.println("O horário atual está entre 20h e 21h");
+				intervalo = 60;
+			} else {
+				// System.out.println("O horário atual NÃO está entre 20h e 21h");
+				intervalo = 600;
+			}
+			System.out.println(dtf.format(now) + " Aguardando " + intervalo / 60
+					+ " min para nova verificacao da chegada do sorteio " + sorteioParaAguardar
+					+ ". O sorteio atual e o " + numSorteio);
+			wait(intervalo);
+		}
+	}
+    private static void prtCabecalho() {
+    	final int maiorQtdDezenas = 10;
+		final String preencheIguais = "=".repeat((maiorQtdDezenas * 3));
+		final String preencheEspacos = " ".repeat((maiorQtdDezenas * 3));
+    	System.out.println(
+				"\n                                                                                                 Número   Qtd      Score"
+						+ preencheEspacos + "");
+		System.out.println(
+				"Rank         Obtido    Investido      Resultado Senas Quinas Quadras Terno Duplas Solos   Filtro Sorteio  Ace      % Descrição       "
+						+ (preencheEspacos + "  Números escolhidos").substring(18)
+						+ " Código Fórmula => Fórmula utilizada para obtenção das dezenas indicadas");
+		System.out.print(
+				"==== ============== ============ ============== ===== ====== ======= ===== ====== ======= ====== ======= ===== ===== ================= "
+						+ preencheIguais + " " +"================ "+ "=".repeat(226));
+		return;
+    }
+    
+	private static String determinarClassificacao(double score) {
+		if (score >= 95)
+			return "EXCEPCIONAL ★★★★★";
+		if (score >= 85)
+			return "EXCELENTE ★★★★   ";
+		if (score >= 75)
+			return "MUITO BOA ★★★    ";
+		if (score >= 65)
+			return "BOA ★★           ";
+		if (score >= 50)
+			return "REGULAR ★        ";
+		return     "FRACA            ";
+	}
+}

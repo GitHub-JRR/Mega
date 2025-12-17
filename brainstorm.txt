@@ -1,0 +1,10 @@
+1) indices de determinação - são valores estatisticos que ajudam a determinar a disncia do ponto de equilibrio. Utilizados na classificação das dezenas.
+2) indices de alocacao - são valores que determinam a posicao dos valores em relacao ao ponto de equilibrio distributivo. Utilizados na distribuição das dezenas.
+
+
+1 ) estrategia distancia mutua entre os maiores e os menores (desvio da media)
+2 ) estratégia do equilibrio definitivo, onde é medida a distancia para o maior de modo a se obter o equilibrio definitivo.
+
+Os indices podem ser de:
+a) influencia direta, quando alteram alem de seu balanciamento o balanciamento de outros indices. 
+B) indices colaterais são os indices que são diretamente infunciados por outros indices.
