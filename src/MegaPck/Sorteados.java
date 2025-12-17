@@ -133,7 +133,8 @@ public class Sorteados {
 	 * Versão 78-1 de 19/05/2025 Foi implementada a correção do Relatorio dos dados de ultimo sorteio, mostrando apenas o total do sorteio e não o total de todos os sorteios.
 	 * Versão 78-2 de 17/08/2025 Ajustado função existeSorteio(), retirado warnings e reagrupado comentários
 	 * Versão 78-3 de 29/08/2025 Implementado getJsonFromUrlWithoutCache e nova fiunção getJsonFromUrl (evita cache)
-	 * Versâo 78-4 de 03/09/2025 Processamento paralelo da carga do rank + sistema de logs
+	 * Versão 78-4 de 03/09/2025 Processamento paralelo da carga do rank + sistema de logs
+	 * Versâo 78-5 de 17/12/2025 Sistea de Log, -w 9999 com apuração já realizada, GitHub
 	 */
 	// ******************************************************
 	/*******************************************************
