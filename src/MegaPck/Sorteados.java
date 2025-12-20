@@ -204,8 +204,8 @@ public class Sorteados {
 	public static final int LIMITE_NUMERO_PARA_GRAVACAO_DE_SEGURANCA = 25;
 	public static final long LIMITE_TEMPO_PARA_GRAVACAO_DE_SEGURANCA = TimeUnit.MINUTES
 			.toMillis((long) (LIMITE_NUMERO_PARA_GRAVACAO_DE_SEGURANCA * TEMPO_MEDIO_PROCESSO_EM_MINUTOS));
-	
-	
+
+
 
 	private static void adicionaJogo(final byte dez01, final byte dez02, final byte dez03, final byte dez04,
 			final byte dez05, final byte dez06, final byte numJogo) {
@@ -374,7 +374,7 @@ public class Sorteados {
 		int itemEncontrado;
 		// final int incremento = (estamosEmTeste ? 1 : 2);
 		//int percente = 0;
-		final int fracao = (nReg  / 100)&~1;
+		final int fracao = (nReg  / 200)&~1;
 		System.setOut(console);
 		//gm.setDuration(2);
 		gm.registrarMensagem("Inicio da apuração das apostas.");
@@ -706,7 +706,7 @@ public class Sorteados {
 
 			String line;
 			while ((line = reader.readLine()) != null ) {
-				
+
 				if ((++qtdRegistros % limite) == 0L) {
 					tracker.print(qtdRegistros);
 				}
@@ -737,7 +737,7 @@ public class Sorteados {
 
 
 	}
-
+	
 	public static void calculoDosFatores()  throws IOException {
 		gm.registrarMensagem("Calculo dos fatores no Rank " + ultimoSorteioNoRank + " sorteios carregados na tabela com "+ ultimoSorteioNaTabela + " registros." ); //+ " "
 		gm.registrarMensagem("A lista com os sorteios entrou com "+listaOrdemSorteio.size()+" registros");
@@ -1081,7 +1081,7 @@ public class Sorteados {
 
 		return String.format("%02d:%02d:%02d.%03d", horas, minutos, segundos, milissegundos);
 	}
-	
+
 	private static String getSequencia(final String local, final String string) throws IOException {
 		final FileFilter filter = file -> file.getName().startsWith(string) & file.getName().endsWith(".txt");
 		final File dir = new File(local);
@@ -1328,7 +1328,7 @@ public class Sorteados {
 		return false;
 	}
 
-	
+
 	public static void testaScore(final String[] args) throws Exception {
 
 		Calibragem.calcularProbabilidadesTeoricas(2881);
@@ -1362,12 +1362,12 @@ public class Sorteados {
 		final byte[] sorteioParaIncluir = new byte[6];
 		final File flagSaidaForcada = new File("saidaForcada.flg");
 		Duration duracaoWaitSorteio = Duration.ZERO ;
-		
+
 		gm.registrarMensagem("=====================================   *********    ===================================================");
 		gm.registrarMensagem("Inicio do processamento do sistema."+ Arrays.toString(args).replace(",", ""));
 		gm.setLimite(500, ModoLimite.TAMANHO_KB);
 		gm.mostrarInfoLog();
-		
+
 		gm.forcarReducaoLog();
 		gm.mostrarInfoLog();
 		resultado = resultado.lastSorteio();
@@ -1409,17 +1409,17 @@ public class Sorteados {
 
 					}
 					if (sorteioParaAguardar == 9999) {
-						/// getSorteio();
-						/// sorteioParaAguardar = numSorteio + 1;
-						// //sorteioParaAguardar = nextSorteio();
 						LocalDate dataAtual = LocalDate.now();
 						DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 						String dataFormatada = dataAtual.format(formatter);
 						if (resultado.getDataApuracao().contentEquals(dataFormatada) ){
 							sorteioParaAguardar = resultado.getNumero();
+						} else if(resultado.getNumero()>contarLinhas("F:\\WrkPlc\\rede\\SorteiosV4.txt")) {	
+							sorteioParaAguardar =resultado.getNumero();
 						} else {
 							sorteioParaAguardar = resultado.getNumeroConcursoProximo();
 						}
+
 					}
 					waitSorteio = false;
 					continue;
@@ -1545,21 +1545,7 @@ public class Sorteados {
 		// nomeRankCalibragem="c:\\$JRR\\Java\\Mega\\teste08\\RankCalibragem58-3.txt";
 		final long tInicialDoPrograma = System.currentTimeMillis();
 		gm.registrarMensagem("Processados os parametros de entrada.");
-		if (nomeRankCalibragem.length() == 0) {
-			// nomeRankCalibragem = nomeRankCalibragem;
-			// } else {
-			nomeRankCalibragem = "RankCalibragem" + ver + ".ZIP";
-			if (continuidade) {
-				final File fileCont = new File("Continuidade.ZIP");
-				if (fileCont.exists()) {
-					nomeRankCalibragemCarga = "Continuidade.ZIP";
-				} else {
-					nomeRankCalibragemCarga = "RankCalibragem" + (ver.substring(0, 3) + (profundidade - 1)) + ".ZIP";
-				}
-			} else {
-				nomeRankCalibragemCarga = nomeRankCalibragem;
-			}
-		}
+		ajustaNomeRank();
 		if (nomeTxtFile.length() == 0) {
 			nomeTxtFile = getSequencia("F:\\WrkPlc\\Relatorios", "Lixo_v_" + ver + "-");
 			gm.registrarMensagem("Definido nome temporario "+nomeTxtFile,DestinoMensagem.LOG );
@@ -1781,7 +1767,7 @@ public class Sorteados {
 			gm.setDuration(3);
 			relatorioApostas(numSorteio + 1, arquivo, console, semNovoCalculo);
 		}
-		
+
 		if (tarefa2 != null ) {
 			System.setOut(console);
 			gm.registrarMensagem("Termino do processamento. Verificando o termino da gravação paralela do Rank "+nomeRankCalibragem);
@@ -1808,10 +1794,10 @@ public class Sorteados {
 		gm.registrarMensagem("Processado com o maior intervalo de : "+gm.getMaiorIntervaloFormatado());
 		gm.registrarMensagem(
 				"Processamento encerrado : "+ formatarDuracao(duracaoTotal) + " de duração" +
-		       (gm.getTempoHibernacao().isPositive()?" - hibernação de aproximadamente "+gm.getTempoHibernacaoFormatado():"")+
-		       (duracaoWaitSorteio.isPositive()?"  - espera do sorteio "+
-		       String.format("%02d:%02d:%02d", duracaoWaitSorteio.toHours(), duracaoWaitSorteio.toMinutesPart(), duracaoWaitSorteio.toSecondsPart()):"")+
-			   (gm.getTempoHibernacao().isPositive()|duracaoWaitSorteio.isPositive()?
+						(gm.getTempoHibernacao().isPositive()?" - hibernação de aproximadamente "+gm.getTempoHibernacaoFormatado():"")+
+						(duracaoWaitSorteio.isPositive()?"  - espera do sorteio "+
+								String.format("%02d:%02d:%02d", duracaoWaitSorteio.toHours(), duracaoWaitSorteio.toMinutesPart(), duracaoWaitSorteio.toSecondsPart()):"")+
+						(gm.getTempoHibernacao().isPositive()|duracaoWaitSorteio.isPositive()?
 								" = "+formatarDuracao(duracaoTotal.minus(gm.getTempoHibernacao()).minus(duracaoWaitSorteio))+" tempo de processamento.":"."));
 		gm.registrarMensagem( "Verifique resultados no arquivo :" + nomeTxtFile);
 
@@ -1819,12 +1805,29 @@ public class Sorteados {
 		gm.registrarMensagem("Final do processamento do sistema.");
 	}
 	private static String formatarDuracao(Duration duration) {
-        long horas = duration.toHours();
-        long minutos = duration.toMinutesPart();
-        long segundos = duration.toSecondsPart();
-        
-        return String.format("%02d:%02d:%02d", horas, minutos, segundos);
-        }
+		long horas = duration.toHours();
+		long minutos = duration.toMinutesPart();
+		long segundos = duration.toSecondsPart();
+
+		return String.format("%02d:%02d:%02d", horas, minutos, segundos);
+	}
+	public static void ajustaNomeRank() {
+		if (nomeRankCalibragem.length() == 0) {
+			// nomeRankCalibragem = nomeRankCalibragem;
+			// } else {
+			nomeRankCalibragem = "RankCalibragem" + ver + ".ZIP";
+			if (continuidade) {
+				final File fileCont = new File("Continuidade.ZIP");
+				if (fileCont.exists()) {
+					nomeRankCalibragemCarga = "Continuidade.ZIP";
+				} else {
+					nomeRankCalibragemCarga = "RankCalibragem" + (ver.substring(0, 3) + (profundidade - 1)) + ".ZIP";
+				}
+			} else {
+				nomeRankCalibragemCarga = nomeRankCalibragem;
+			}
+		}
+	}
 
 	// Recebe uma matriz com n elementos e a definição da quantidade de itens
 	// classificados na resposta.
@@ -1999,21 +2002,21 @@ public class Sorteados {
 			// int confirmado=0;
 			int concursoFinal = 0;
 			// //while (confirmado==0) {
-				while (concursoFinal==0){
-					//gm.registrarMensagem("Na leitura do TXT erro na obtenção do numero do ultimo sorteio.");
-					resultado = resultado.lastSorteio();
-					concursoFinal = resultado.getNumero();
-					if (sorteioParaAguardar>0 & sorteioParaAguardar != concursoFinal) {
-						gm.registrarMensagem("O concurso disponível ("+concursoFinal+") está diferente do concurso alvo do processsamento ("+
-								sorteioParaAguardar+"). A data prevista para o proximo sorteio "+resultado.getDataProximoConcurso()+" Vou tentar novamente.");
-						concursoFinal=0;
-					} else if (concursoFinal != 0 ) {
-						gm.registrarMensagem("Obtido "+concursoFinal+" como numero do ultimo sorteio.");
-						break;
-					}
-					
+			while (concursoFinal==0){
+				//gm.registrarMensagem("Na leitura do TXT erro na obtenção do numero do ultimo sorteio.");
+				resultado = resultado.lastSorteio();
+				concursoFinal = resultado.getNumero();
+				if (sorteioParaAguardar>0 & sorteioParaAguardar != concursoFinal) {
+					gm.registrarMensagem("O concurso disponível ("+concursoFinal+") está diferente do concurso alvo do processsamento ("+
+							sorteioParaAguardar+"). A data prevista para o proximo sorteio "+resultado.getDataProximoConcurso()+" Vou tentar novamente.");
+					concursoFinal=0;
+				} else if (concursoFinal != 0 ) {
+					gm.registrarMensagem("Obtido "+concursoFinal+" como numero do ultimo sorteio.");
+					break;
 				}
-				/*// //
+
+			}
+			/*// //
 				gm.registrarMensagem("Confirmando "+concursoFinal+" como numero do ultimo sorteio.");
 				confirmado = lastSorteio();
 				if (confirmado == concursoFinal ) {
@@ -2025,7 +2028,7 @@ public class Sorteados {
 					confirmado=0;
 				}
 			}
-			*/ // //
+			 */ // //
 			if (qtdLinhasNoTxt < concursoFinal) {
 				for (int n = (qtdLinhasNoTxt + 1); n <= concursoFinal; n++) {
 					url = baseUrl + "/" + n;
@@ -2068,7 +2071,7 @@ public class Sorteados {
 					System.setOut(arquivo);
 				}
 			}
-			*/ // //
+			 */ // //
 			//listaRateioPremio = jsonResponse.getJSONArray("listaRateioPremio");
 			rateioSena = resultado.getListaRateioPremio().get(0).getValorPremio();// // listaRateioPremio.getJSONObject(0).getDouble("valorPremio");
 			qtdGandoresSena = resultado.getListaRateioPremio().get(0).getNumeroDeGanhadores() ; // //listaRateioPremio.getJSONObject(0).getInt("numeroDeGanhadores");
@@ -2489,18 +2492,18 @@ public class Sorteados {
 		//int intervalo = 600;
 		//Calendar agora;
 		//int hora;
-		 SmartWait waitManager = new SmartWait(gm);
-         
-         // Configura os intervalos com diferentes unidades
-         waitManager.addInterval("01:00", 10);  
-         waitManager.addInterval("21:00", 1);   
-         waitManager.addInterval("21:30", 30, SmartWait.TimeUnitMeasure.SECONDS);  
-         waitManager.addInterval("22:00", 1); 
-		 waitManager.addInterval("23:00", 10); 
-         waitManager.addInterval("23:30", 1 ,SmartWait.TimeUnitMeasure.HOURS); 
-         waitManager.listIntervals();
-         
-         // Lista os intervalos configurados
+		SmartWait waitManager = new SmartWait(gm);
+
+		// Configura os intervalos com diferentes unidades
+		waitManager.addInterval("01:00", 10);  
+		waitManager.addInterval("21:00", 1);   
+		waitManager.addInterval("21:30", 30, SmartWait.TimeUnitMeasure.SECONDS);  
+		waitManager.addInterval("22:00", 1); 
+		waitManager.addInterval("23:00", 10); 
+		waitManager.addInterval("23:30", 1 ,SmartWait.TimeUnitMeasure.HOURS); 
+		waitManager.listIntervals();
+
+		// Lista os intervalos configurados
 		while (true) {
 			/// getSorteio();
 			/// if (sorteioParaAguardar == numSorteio) {
@@ -2532,15 +2535,15 @@ public class Sorteados {
 					gm.registrarMensagem("Aguardando chegada do sorteio " + sorteioParaAguardar + ", mas o sorteio atual na Caixa é o "+numSorteio+".");
 				}
 			}
-			
+
 			if (numSorteio == 0) {
 				gm.registrarMensagem(" Erro ao acessar o serviço da Caixa.");
 			} else {
 				gm.registrarMensagem("Aguardando para nova verificacao da chegada do sorteio " + sorteioParaAguardar
 						+ ". A previsão do próximo sorteio é para "+
-				(resultado.getDataProximoConcurso().equals(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))?
-						"hoje":
-							resultado.getDataProximoConcurso()	)+". O sorteio atual e o " + numSorteio);
+						(resultado.getDataProximoConcurso().equals(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))?
+								"hoje":
+									resultado.getDataProximoConcurso()	)+". O sorteio atual e o " + numSorteio);
 			}
 			//wait(intervalo);
 			waitManager.smartWait();
@@ -2578,5 +2581,5 @@ public class Sorteados {
 			return "REGULAR *        ";//★         ";
 		return     "FRACA            ";
 	}
-	
+
 }
